@@ -3,469 +3,440 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Elprisanalys SE3 – Spot vs Månadsavtal</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>Spot vs Månadsavtal – SE3 Solceller</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --bg: #f0ede8;
-  --surface: #f8f6f2;
-  --card: #ffffff;
-  --dark: #161b27;
-  --amber: #d9880e;
-  --blue: #1c65b8;
-  --green: #277a4f;
-  --red: #c53030;
-  --border: #e0dbd3;
-  --muted: #6b7585;
-  --mono: 'DM Mono', monospace;
-  --sans: 'Syne', system-ui, sans-serif;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--sans); background: var(--bg); color: var(--dark); line-height: 1.5; min-height: 100vh; }
+:root{--bg:#f0ede8;--card:#fff;--dark:#161b27;--amber:#d9880e;--blue:#1c65b8;--green:#277a4f;--red:#c53030;--border:#dedad3;--muted:#6b7585;--surf:#f7f5f1;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',system-ui,sans-serif;background:var(--bg);color:var(--dark);line-height:1.5;}
 
 /* HEADER */
-.header { background: var(--dark); color: #fff; padding: 3.5rem 2rem 3rem; }
-.header-inner { max-width: 1080px; margin: 0 auto; }
-.zone-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--amber); color: #fff;
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
-  padding: 0.25rem 0.75rem; border-radius: 100px; margin-bottom: 1.2rem;
-}
-.header h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
-.header h1 em { color: var(--amber); font-style: normal; }
-.header-meta { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1.5rem; }
-.header-stat { font-size: 0.8rem; color: rgba(255,255,255,0.55); }
-.header-stat strong { display: block; color: rgba(255,255,255,0.9); font-size: 1rem; font-family: var(--mono); margin-bottom: 0.15rem; }
+.hdr{background:var(--dark);color:#fff;padding:3rem 2rem 2.5rem;}
+.hdr-inner{max-width:1040px;margin:0 auto;}
+.pill{display:inline-block;background:var(--amber);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:.09em;padding:.22rem .7rem;border-radius:100px;margin-bottom:1rem;}
+.hdr h1{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:.5rem;}
+.hdr h1 em{color:var(--amber);font-style:normal;}
+.hdr p{font-size:.85rem;color:rgba(255,255,255,.55);max-width:560px;margin-top:.6rem;}
 
-/* MAIN */
-.container { max-width: 1080px; margin: 0 auto; padding: 2rem; }
+/* HERO SCORE */
+.hero{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.5rem;}
+.hero-cell{background:var(--card);padding:1.4rem 1.5rem;}
+.hero-lbl{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:.5rem;}
+.hero-num{font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;line-height:1;}
+.hero-sub{font-size:.72rem;color:var(--muted);margin-top:.4rem;}
+.c-blue{color:var(--blue);}
+.c-amber{color:var(--amber);}
+.c-green{color:var(--green);}
+.c-red{color:var(--red);}
+.c-dark{color:var(--dark);}
+
+/* VERDICT BANNER */
+.verdict{border-radius:10px;padding:1.1rem 1.4rem;font-size:.95rem;font-weight:700;line-height:1.5;margin-bottom:1.5rem;}
+.v-spot{background:#e6effa;color:#123b7a;border:1px solid #b3ceee;}
+.v-fixed{background:#fef3de;color:#7a4406;border:1px solid #f5d590;}
+.v-equal{background:var(--surf);color:var(--muted);border:1px solid var(--border);}
+.verdict .small{font-weight:400;font-size:.8rem;display:block;margin-top:.3rem;opacity:.8;}
+
+/* MAIN LAYOUT */
+.wrap{max-width:1040px;margin:0 auto;padding:2rem;}
 
 /* CARD */
-.card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
-.card-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.25rem; }
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;}
+.card-ttl{font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1.25rem;}
 
 /* CONTROLS */
-.controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem 2rem; }
-.ctrl { display: flex; flex-direction: column; gap: 0.5rem; }
-.ctrl-head { display: flex; justify-content: space-between; align-items: baseline; }
-.ctrl-label { font-size: 0.85rem; font-weight: 700; }
-.ctrl-val { font-family: var(--mono); font-size: 1rem; font-weight: 500; color: var(--blue); }
-.ctrl-desc { font-size: 0.73rem; color: var(--muted); line-height: 1.4; }
-input[type=range] { width: 100%; height: 4px; accent-color: var(--blue); cursor: pointer; }
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;}
+.ctrl{display:flex;flex-direction:column;gap:.45rem;}
+.ctrl-head{display:flex;justify-content:space-between;align-items:baseline;}
+.ctrl-lbl{font-size:.84rem;font-weight:700;}
+.ctrl-v{font-family:'DM Mono',monospace;font-size:.95rem;color:var(--blue);}
+.ctrl-desc{font-size:.72rem;color:var(--muted);line-height:1.4;}
+input[type=range]{width:100%;accent-color:var(--blue);}
 
-/* YEAR TABS */
-.year-strip { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-.ytab {
-  padding: 0.3rem 0.75rem; border-radius: 7px; cursor: pointer;
-  border: 1.5px solid var(--border); background: transparent;
-  font-family: var(--mono); font-size: 0.8rem; font-weight: 500;
-  color: var(--muted); transition: all 0.12s; white-space: nowrap;
-}
-.ytab:hover { border-color: var(--blue); color: var(--blue); }
-.ytab.active { background: var(--dark); border-color: var(--dark); color: #fff; }
+/* YEAR SLIDER SECTION */
+.yr-row{display:flex;align-items:center;gap:1.5rem;}
+.yr-disp{font-family:'DM Mono',monospace;font-size:1.6rem;font-weight:500;color:var(--dark);min-width:60px;}
+.yr-slider{flex:1;}
+.yr-labels{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);margin-top:.3rem;}
 
-/* VIEW TABS */
-.vtabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
-.vtab { padding: 0.55rem 1.1rem; font-size: 0.85rem; font-weight: 700; border: none; background: none; cursor: pointer; color: var(--muted); border-bottom: 2.5px solid transparent; margin-bottom: -1px; transition: all 0.12s; }
-.vtab.active { color: var(--dark); border-bottom-color: var(--dark); }
-.vcontent { display: none; }
-.vcontent.active { display: block; }
+/* MONTH CHART ANNOTATIONS */
+.month-grid{display:grid;grid-template-columns:repeat(12,1fr);font-family:'DM Mono',monospace;font-size:.65rem;text-align:center;color:var(--muted);margin-top:.5rem;}
+.solar-label{color:var(--amber);font-weight:700;}
 
-/* STATS */
-.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.85rem; margin-bottom: 1.25rem; }
-.scard { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.9rem 1.1rem; }
-.scard-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.35rem; }
-.scard-val { font-family: var(--mono); font-size: 1.45rem; font-weight: 500; line-height: 1; }
-.scard-sub { font-size: 0.68rem; color: var(--muted); margin-top: 0.3rem; }
-.c-blue { color: var(--blue); }
-.c-amber { color: var(--amber); }
-.c-green { color: var(--green); }
-.c-red { color: var(--red); }
-.c-dark { color: var(--dark); }
-
-/* VERDICT */
-.verdict { border-radius: 8px; padding: 0.9rem 1.1rem; font-size: 0.88rem; font-weight: 700; margin-top: 0.5rem; line-height: 1.4; }
-.v-spot { background: #e6effa; color: #123b7a; border: 1px solid #b3ceee; }
-.v-fixed { background: #fef3de; color: #7a4406; border: 1px solid #f5d590; }
-.v-equal { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+/* CHART WRAP */
+.ch-wrap{position:relative;width:100%;}
 
 /* LEGEND */
-.legend { display: flex; flex-wrap: wrap; gap: 1.2rem; font-size: 0.78rem; color: var(--muted); margin: 1rem 0 0.75rem; }
-.leg-item { display: flex; align-items: center; gap: 5px; }
-.leg-sq { width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
-.leg-dashed { width: 11px; height: 11px; border-radius: 2px; border: 2px dashed var(--amber); background: transparent; flex-shrink: 0; }
+.legend{display:flex;flex-wrap:wrap;gap:1rem;font-size:.76rem;color:var(--muted);margin:.8rem 0;}
+.li{display:flex;align-items:center;gap:5px;}
+.lsq{width:11px;height:11px;border-radius:2px;flex-shrink:0;}
+.ldash{width:16px;height:2px;border-top:2.5px dashed var(--amber);flex-shrink:0;}
 
-/* CHART WRAPPERS */
-.chart-wrap { position: relative; width: 100%; }
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+.tbl th{padding:.5rem .75rem;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+.tbl td{padding:.6rem .75rem;border-bottom:.5px solid var(--border);font-family:'DM Mono',monospace;}
+.tbl tbody tr:last-child td{border-bottom:none;}
+.tbl tbody tr:hover td{background:var(--surf);}
+.yr-td{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;}
+.badge{display:inline-block;font-size:.67rem;font-weight:700;letter-spacing:.07em;padding:.15rem .55rem;border-radius:5px;}
+.bs{background:#e6effa;color:#123b7a;}
+.bf{background:#fef3de;color:#7a4406;}
+.be{background:var(--surf);color:var(--muted);border:1px solid var(--border);}
 
-/* INFO BOX */
-.info-box { background: var(--surface); border-left: 3px solid var(--amber); border-radius: 0 8px 8px 0; padding: 0.85rem 1rem; font-size: 0.78rem; color: var(--muted); line-height: 1.5; margin-bottom: 1.25rem; }
-.info-box strong { color: var(--dark); font-weight: 700; }
+.note{background:var(--surf);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:.8rem 1rem;font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:1.25rem;}
+.note strong{color:var(--dark);}
 
-/* OVERVIEW TABLE */
-.ov-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; margin-top: 1.5rem; }
-.ov-table th { padding: 0.5rem 0.75rem; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
-.ov-table td { padding: 0.6rem 0.75rem; border-bottom: 0.5px solid var(--border); font-family: var(--mono); }
-.ov-table tr:last-child td { border-bottom: none; }
-.ov-table tr:hover td { background: var(--surface); }
-.yr-cell { font-family: var(--sans); font-weight: 700; font-size: 0.9rem; }
-.badge { display: inline-block; font-size: 0.67rem; font-weight: 700; letter-spacing: 0.07em; padding: 0.15rem 0.5rem; border-radius: 5px; }
-.b-spot { background: #e6effa; color: #123b7a; }
-.b-fixed { background: #fef3de; color: #7a4406; }
-.b-equal { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
-.b-warn { background: #fff0f0; color: #8a1f1f; }
-
-/* FOOTER */
-footer { text-align: center; padding: 2rem; font-size: 0.73rem; color: var(--muted); }
-
-@media (max-width: 640px) {
-  .header { padding: 2rem 1.25rem; }
-  .container { padding: 1.25rem; }
-  .ov-table { font-size: 0.73rem; }
-  .ov-table th, .ov-table td { padding: 0.45rem 0.5rem; }
-}
+footer{text-align:center;padding:2rem;font-size:.72rem;color:var(--muted);}
+@media(max-width:600px){.hero{grid-template-columns:1fr 1fr;}.hero-cell:last-child{grid-column:span 2;}}
 </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="header-inner">
-    <div class="zone-pill">&#9679; NORDPOOL SE3</div>
-    <h1>Spot vs <em>Månadsavtal</em><br>med solceller</h1>
-    <div class="header-meta">
-      <div class="header-stat"><strong>2015 – 2025</strong>11 år historisk data</div>
-      <div class="header-stat"><strong>Priszon SE3</strong>Stockholm / Mälardalen</div>
-      <div class="header-stat"><strong>öre/kWh</strong>Exkl. skatt, moms &amp; nät</div>
-    </div>
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="pill">SE3 · 2015–2025</div>
+    <h1>Spot eller <em>Månadsavtal</em>?</h1>
+    <p>Med solceller i zon SE3. Köper el 6 månader/år, säljer överskott 6 månader.</p>
   </div>
 </header>
 
-<main class="container">
+<div class="wrap">
 
-  <!-- Controls -->
+  <!-- Inställningar -->
   <div class="card">
-    <div class="card-title">Inställningar</div>
-    <div class="controls-grid">
+    <div class="card-ttl">Dina uppgifter</div>
+    <div class="ctrls">
       <div class="ctrl">
-        <div class="ctrl-head">
-          <span class="ctrl-label">Månadsförbrukning</span>
-          <span class="ctrl-val" id="vConsumption">500 kWh</span>
-        </div>
-        <input type="range" id="sConsumption" min="100" max="3000" step="50" value="500">
-        <div class="ctrl-desc">Din normala förbrukning per månad. Apr–Sep: solceller täcker dubbelt — du säljer lika mycket som du förbrukar tillbaka till nätet.</div>
+        <div class="ctrl-head"><span class="ctrl-lbl">Din månadsförbrukning</span><span class="ctrl-v" id="vC">500 kWh</span></div>
+        <input type="range" id="sC" min="100" max="3000" step="50" value="500">
+        <div class="ctrl-desc">Hur mycket du köper från nätet per månad (okt–mars). Apr–sep täcker solcellerna dubbelt – du exporterar lika mycket som du förbrukar.</div>
       </div>
       <div class="ctrl">
-        <div class="ctrl-head">
-          <span class="ctrl-label">Påslag månadsavtal</span>
-          <span class="ctrl-val" id="vMarkup">5 öre/kWh</span>
-        </div>
-        <input type="range" id="sMarkup" min="0" max="20" step="1" value="5">
-        <div class="ctrl-desc">Leverantörens riskpremie utöver årsgenomsnittet. Fast pris = årsmedel + detta påslag. (0 = leverantör tar ingen marginal.)</div>
-      </div>
-      <div class="ctrl">
-        <div class="ctrl-head">
-          <span class="ctrl-label">Inmatningspris</span>
-          <span class="ctrl-val" id="vExport">100%</span>
-        </div>
-        <input type="range" id="sExport" min="50" max="100" step="5" value="100">
-        <div class="ctrl-desc">Andel av spotpriset du får för din export. Båda avtalsformerna ger dig spotpris vid försäljning; bara köppriset skiljer.</div>
+        <div class="ctrl-head"><span class="ctrl-lbl">Leverantörens påslag</span><span class="ctrl-v" id="vM">5 öre/kWh</span></div>
+        <input type="range" id="sM" min="0" max="20" step="1" value="5">
+        <div class="ctrl-desc">Marginalen leverantören lägger på det rörliga priset för att sätta ett fast månadsavtal. Typiskt 3–10 öre.</div>
       </div>
     </div>
   </div>
 
-  <!-- Year selector -->
+  <!-- Total verdict -->
+  <div id="heroBox"></div>
+  <div id="verdictBox"></div>
+
+  <!-- Year detail -->
   <div class="card">
-    <div class="card-title">Välj år för månadsvy</div>
-    <div class="year-strip" id="yearStrip"></div>
+    <div class="card-ttl">Zooma in på ett år</div>
+    <div class="yr-row">
+      <div class="yr-disp" id="yrDisp">2024</div>
+      <div style="flex:1">
+        <input type="range" id="sY" min="0" max="10" step="1" value="9" style="width:100%;accent-color:var(--dark)">
+        <div class="yr-labels"><span>2015</span><span>2025</span></div>
+      </div>
+    </div>
+    <div style="margin-top:.5rem;" id="yrVerdict"></div>
   </div>
 
-  <!-- Chart card -->
   <div class="card">
-    <div class="vtabs">
-      <button class="vtab active" onclick="switchView('monthly',this)">Månadsvy</button>
-      <button class="vtab" onclick="switchView('overview',this)">Årsöversikt 2015–2025</button>
+    <div class="card-ttl" id="monthlyTitle">Nettokostnad per månad – 2024</div>
+    <div class="note">
+      <strong>Solmånaderna apr–sep (orange)</strong>: du exporterar el och tjänar pengar – båda avtal ger dig spotpriset vid försäljning. Skillnaden uppstår bara under vinterhalvåret när du <em>köper</em> el.
+    </div>
+    <div class="legend">
+      <span class="li"><span class="lsq" style="background:#1c65b8cc;"></span>Spot – köpmånad</span>
+      <span class="li"><span class="lsq" style="background:#d9880ecc;"></span>Månadsavtal – köpmånad</span>
+      <span class="li"><span class="lsq" style="background:#27aa6055;"></span>Solmånad (inkomst, lika för båda)</span>
+      <span class="li" style="font-style:italic;font-size:.72rem;">Negativa staplar = du tjänar pengar</span>
+    </div>
+    <div class="ch-wrap" style="height:300px;">
+      <canvas id="cM" role="img" aria-label="Månatlig nettokostnad spot kontra fast avtal"></canvas>
     </div>
 
-    <!-- Monthly view -->
-    <div class="vcontent active" id="vc-monthly">
-
-      <div class="info-box">
-        <strong>Antagande:</strong> Månadsavtalspriset = årsgenomsnittet för SE3 det året + ditt påslag.
-        Rörligt spot = faktiskt månadsmedelpris. Solmånader (apr–sep): du säljer netto <em>konsumtionen</em> tillbaka till nätet (båda avtal ger dig spotpris vid försäljning).
-      </div>
-
-      <div class="stats-row" id="statsRow"></div>
-      <div id="verdictBox"></div>
-
-      <div class="legend">
-        <span class="leg-item"><span class="leg-sq" style="background:#1c65b8cc;"></span>Rörligt spot – kostnad</span>
-        <span class="leg-item"><span class="leg-sq" style="background:#d9880ecc;"></span>Månadsavtal – kostnad</span>
-        <span class="leg-item"><span class="leg-sq" style="background:#1c65b855;"></span>Rörligt spot – solmånad (inkomst)</span>
-        <span class="leg-item"><span class="leg-dashed"></span>Fast avtal – solmånad (inkomst)</span>
-        <span class="leg-item" style="font-style:italic;">Negativa staplar = du tjänar pengar</span>
-      </div>
-
-      <div class="chart-wrap" style="height:320px;">
-        <canvas id="chartMonthly" role="img" aria-label="Månatlig nettokostnad i kronor för rörligt spot kontra månadsavtal"></canvas>
-      </div>
-
-      <div style="margin-top:1.5rem;" class="card-title">Spotpris SE3 – öre/kWh</div>
-      <div class="chart-wrap" style="height:200px; margin-top:0.75rem;">
-        <canvas id="chartPrice" role="img" aria-label="Månadsvis spotpris SE3 i öre per kWh"></canvas>
-      </div>
-
+    <div style="margin-top:1.5rem;" class="card-ttl" id="priceTitle">Spotpris SE3 – öre/kWh (2024)</div>
+    <div class="legend" style="margin-top:.5rem;">
+      <span class="li"><span class="lsq" style="background:#1c65b8cc;"></span>Spotpris</span>
+      <span class="li"><span class="ldash"></span>Månadsavtalspris (föreg. månad + påslag)</span>
     </div>
-
-    <!-- Overview view -->
-    <div class="vcontent" id="vc-overview">
-
-      <div class="info-box">
-        <strong>Obs:</strong> Diagrammet visar din <em>nettokostnad per år</em> (köpkostnader minus solintäkter). Negativa värden innebär att solintäkterna överstiger köpkostnaderna — du är nettoproducent det året.
-      </div>
-
-      <div class="legend" style="margin-top:0;">
-        <span class="leg-item"><span class="leg-sq" style="background:#1c65b8cc;"></span>Rörligt spot</span>
-        <span class="leg-item"><span class="leg-sq" style="background:#d9880ecc;"></span>Månadsavtal</span>
-      </div>
-
-      <div class="chart-wrap" style="height:320px;">
-        <canvas id="chartOverview" role="img" aria-label="Jämförelse av nettokostnad per år 2015 till 2025 för spot kontra månadsavtal"></canvas>
-      </div>
-
-      <table class="ov-table" id="ovTable">
-        <thead>
-          <tr>
-            <th>År</th>
-            <th>Årsmedel öre</th>
-            <th>Fast pris öre</th>
-            <th>Spot netto kr</th>
-            <th>Fast netto kr</th>
-            <th>Skillnad kr</th>
-            <th>Bäst</th>
-          </tr>
-        </thead>
-        <tbody id="ovBody"></tbody>
-      </table>
-
+    <div class="ch-wrap" style="height:190px;margin-top:.5rem;">
+      <canvas id="cP" role="img" aria-label="Spotpris och fast pris i öre per kWh"></canvas>
     </div>
   </div>
 
-</main>
+  <!-- All-year table -->
+  <div class="card">
+    <div class="card-ttl">Alla år – sammanfattning</div>
+    <div class="ch-wrap" style="height:280px;margin-bottom:1.5rem;">
+      <canvas id="cO" role="img" aria-label="Nettokostnad per år spot kontra månadsavtal 2015 till 2025"></canvas>
+    </div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>År</th>
+          <th>Spot – netto kr</th>
+          <th>Månadsavtal – netto kr</th>
+          <th>Du sparar med spot</th>
+          <th>Vinnare</th>
+        </tr>
+      </thead>
+      <tbody id="tBody"></tbody>
+      <tfoot id="tFoot" style="font-weight:700;border-top:2px solid var(--border);"></tfoot>
+    </table>
+  </div>
 
-<footer>
-  Priskälla: Nordpool via elpriser.nu &nbsp;·&nbsp; Priszon SE3 &nbsp;·&nbsp; Exkl. elcertifikat, energiskatt, moms och elnätskostnader
-</footer>
+</div>
+
+<footer>Priskälla: Nordpool via elpriser.nu · SE3 · Exkl. skatt, moms och nätavgifter</footer>
 
 <script>
+/* ---- DATA ---- */
 const PRICES = {
-  2015: [28.53,28.07,23.94,23.82,20.94,14.18,8.50,15.87,19.65,22.09,24.01,18.18],
-  2016: [28.77,18.30,20.07,20.32,21.98,31.48,27.42,28.94,27.94,35.11,40.41,32.24],
-  2017: [30.37,31.36,28.98,27.69,28.70,26.39,29.59,32.11,34.74,29.37,31.47,30.45],
-  2018: [31.81,39.55,45.55,40.33,33.85,45.45,54.09,57.03,51.99,45.68,51.34,52.26],
-  2019: [55.80,47.74,41.38,41.60,37.40,26.00,37.03,39.71,37.18,40.73,44.56,37.76],
-  2020: [25.02,19.46,14.96,9.80,13.54,24.89,9.26,34.71,34.85,23.02,24.13,31.58],
-  2021: [49.05,53.63,36.78,33.68,43.50,40.30,59.05,67.11,91.84,64.75,83.52,180.74],
-  2022: [104.33,77.48,130.33,89.22,102.86,126.31,86.61,223.05,228.63,80.65,130.88,269.02],
-  2023: [92.58,82.54,80.62,68.70,39.02,53.06,37.65,36.96,24.32,33.06,82.13,79.18],
-  2024: [80.30,50.34,59.47,56.31,23.71,27.27,20.72,8.54,16.44,22.97,66.95,58.25],
-  2025: [63.44,77.05,50.81,37.61,42.94,22.79,37.01,48.56,52.33,62.81,69.65,51.68]
+  2015:[28.53,28.07,23.94,23.82,20.94,14.18,8.50,15.87,19.65,22.09,24.01,18.18],
+  2016:[28.77,18.30,20.07,20.32,21.98,31.48,27.42,28.94,27.94,35.11,40.41,32.24],
+  2017:[30.37,31.36,28.98,27.69,28.70,26.39,29.59,32.11,34.74,29.37,31.47,30.45],
+  2018:[31.81,39.55,45.55,40.33,33.85,45.45,54.09,57.03,51.99,45.68,51.34,52.26],
+  2019:[55.80,47.74,41.38,41.60,37.40,26.00,37.03,39.71,37.18,40.73,44.56,37.76],
+  2020:[25.02,19.46,14.96,9.80,13.54,24.89,9.26,34.71,34.85,23.02,24.13,31.58],
+  2021:[49.05,53.63,36.78,33.68,43.50,40.30,59.05,67.11,91.84,64.75,83.52,180.74],
+  2022:[104.33,77.48,130.33,89.22,102.86,126.31,86.61,223.05,228.63,80.65,130.88,269.02],
+  2023:[92.58,82.54,80.62,68.70,39.02,53.06,37.65,36.96,24.32,33.06,82.13,79.18],
+  2024:[80.30,50.34,59.47,56.31,23.71,27.27,20.72,8.54,16.44,22.97,66.95,58.25],
+  2025:[63.44,77.05,50.81,37.61,42.94,22.79,37.01,48.56,52.33,62.81,69.65,51.68]
 };
-const MONTHS = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
-const SOLAR = new Set([3,4,5,6,7,8]);
+const MO = ['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
+const SOLAR = new Set([3,4,5,6,7,8]); // Apr–Sep
 const YEARS = Object.keys(PRICES).map(Number).sort();
 
-let selYear = 2024, consumption = 500, markup = 5, exportPct = 1.0;
-let cMonthly = null, cPrice = null, cOverview = null;
+/* ---- STATE ---- */
+let selIdx = 9; // 2024
+let consumption = 500;
+let markup = 5;
 
-function annualAvg(y) { return PRICES[y].reduce((a,b)=>a+b,0)/12; }
+/* ---- FIXED PRICE MODEL ----
+   Månadsavtalspriset för månad M = föregående månads spotpris + påslag.
+   Logik: leverantören sätter priset baserat på senaste kända spotpris.
+   För januari 2015 (ingen föregående data) används årsgenomsnittet. */
+function buildFixedPrices(year) {
+  const sp = PRICES[year];
+  const prevYear = PRICES[year - 1];
+  const fixed = [];
+  for (let m = 0; m < 12; m++) {
+    let base;
+    if (m === 0) {
+      // Föregående december
+      base = prevYear ? prevYear[11] : sp.reduce((a,b)=>a+b,0)/12;
+    } else {
+      base = sp[m-1];
+    }
+    fixed.push(base + markup);
+  }
+  return fixed;
+}
 
-function calc(year) {
-  const prices = PRICES[year];
-  const avg = annualAvg(year);
-  const fixedP = avg + markup;
+/* ---- CALC ---- */
+function calcYear(year) {
+  const spot = PRICES[year];
+  const fixed = buildFixedPrices(year);
   let spotTotal = 0, fixedTotal = 0;
   const spotM = [], fixedM = [];
   for (let m = 0; m < 12; m++) {
-    const p = prices[m];
     if (SOLAR.has(m)) {
-      const inc = -(p * exportPct * consumption) / 100;
+      // Säljer: inkomst = förbrukning × spotpris (samma för båda)
+      const inc = -(spot[m] * consumption) / 100;
       spotM.push(inc); fixedM.push(inc);
       spotTotal += inc; fixedTotal += inc;
     } else {
-      const sc = (p * consumption) / 100;
-      const fc = (fixedP * consumption) / 100;
+      // Köper
+      const sc = (spot[m] * consumption) / 100;
+      const fc = (fixed[m] * consumption) / 100;
       spotM.push(sc); fixedM.push(fc);
       spotTotal += sc; fixedTotal += fc;
     }
   }
-  return { spotTotal, fixedTotal, spotM, fixedM, avg, fixedP };
+  return { spotTotal, fixedTotal, spotM, fixedM, spotPrices: spot, fixedPrices: fixed };
 }
 
-function buildYearStrip() {
-  document.getElementById('yearStrip').innerHTML = YEARS.map(y =>
-    `<button class="ytab${y===selYear?' active':''}" onclick="pickYear(${y})">${y}</button>`
-  ).join('');
-}
-
-function pickYear(y) { selYear = y; buildYearStrip(); renderMonthly(); }
+/* ---- CHARTS ---- */
+let cM=null, cP=null, cO=null;
 
 function renderMonthly() {
-  const { spotTotal, fixedTotal, spotM, fixedM, avg, fixedP } = calc(selYear);
-  const diff = fixedTotal - spotTotal;
-  const fmt = v => (v<0?'−':'')+Math.abs(v).toFixed(0);
+  const year = YEARS[selIdx];
+  const { spotTotal, fixedTotal, spotM, fixedM, spotPrices, fixedPrices } = calcYear(year);
+  document.getElementById('monthlyTitle').textContent = `Nettokostnad per månad – ${year}`;
+  document.getElementById('priceTitle').textContent = `Spotpris SE3 – öre/kWh (${year})`;
 
-  // Stats
-  const spotCls = spotTotal <= fixedTotal ? 'c-green' : 'c-red';
-  const fixCls  = fixedTotal <= spotTotal ? 'c-green' : 'c-red';
-  document.getElementById('statsRow').innerHTML = `
-    <div class="scard"><div class="scard-lbl">Spot – netto/år</div><div class="scard-val ${spotCls}">${fmt(spotTotal)} kr</div><div class="scard-sub">Rörligt månadsmedel</div></div>
-    <div class="scard"><div class="scard-lbl">Månadsavtal – netto/år</div><div class="scard-val ${fixCls}">${fmt(fixedTotal)} kr</div><div class="scard-sub">${avg.toFixed(1)} + ${markup} = ${fixedP.toFixed(1)} öre/kWh</div></div>
-    <div class="scard"><div class="scard-lbl">Skillnad</div><div class="scard-val ${diff>50?'c-blue':diff<-50?'c-amber':'c-dark'}">${diff>0?'+':''}${fmt(diff)} kr</div><div class="scard-sub">Positivt = Spot billigare</div></div>
-    <div class="scard"><div class="scard-lbl">Årsmedel SE3</div><div class="scard-val c-dark">${avg.toFixed(1)}</div><div class="scard-sub">öre/kWh (${selYear})</div></div>`;
+  const diff = fixedTotal - spotTotal;
+  let vHtml;
+  if (Math.abs(diff) < 80) {
+    vHtml = `<div class="verdict v-equal" style="margin-top:.75rem;">≈ ${year}: Ungefär lika – skillnad ${Math.abs(diff).toFixed(0)} kr</div>`;
+  } else if (diff > 0) {
+    vHtml = `<div class="verdict v-spot" style="margin-top:.75rem;">↓ ${year}: Spot sparade dig <strong>${Math.round(diff)} kr</strong> jämfört med månadsavtal</div>`;
+  } else {
+    vHtml = `<div class="verdict v-fixed" style="margin-top:.75rem;">↓ ${year}: Månadsavtal sparade dig <strong>${Math.round(-diff)} kr</strong> jämfört med spot</div>`;
+  }
+  document.getElementById('yrVerdict').innerHTML = vHtml;
+
+  // Cost bar chart
+  const bgSpot = MO.map((_,i)=>SOLAR.has(i)?'rgba(39,170,96,0.4)':'rgba(28,101,184,0.82)');
+  const bgFix  = MO.map((_,i)=>SOLAR.has(i)?'rgba(39,170,96,0.15)':'rgba(217,136,14,0.82)');
+
+  if (cM) cM.destroy();
+  cM = new Chart(document.getElementById('cM'), {
+    type:'bar',
+    data:{
+      labels:MO,
+      datasets:[
+        {label:'Spot',      data:spotM.map(v=>Math.round(v)), backgroundColor:bgSpot, borderWidth:0},
+        {label:'Månadsavtal',data:fixedM.map(v=>Math.round(v)), backgroundColor:bgFix,  borderWidth:0}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;return ` ${ctx.dataset.label}: ${Math.round(v)} kr${v<0?' (inkomst)':' (kostnad)'}`;} }}},
+      scales:{
+        x:{ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',autoSkip:false},grid:{color:'rgba(0,0,0,0.04)'}},
+        y:{ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',callback:v=>v+' kr'},grid:{color:'rgba(0,0,0,0.06)'}}
+      }
+    }
+  });
+
+  // Price line chart
+  const ptBg = MO.map((_,i)=>SOLAR.has(i)?'#d9880e':'#1c65b8');
+  if (cP) cP.destroy();
+  cP = new Chart(document.getElementById('cP'), {
+    type:'line',
+    data:{
+      labels:MO,
+      datasets:[
+        {label:'Spotpris',    data:spotPrices, backgroundColor:'rgba(28,101,184,0.06)', borderColor:'#1c65b8', borderWidth:2.5, pointBackgroundColor:ptBg, pointRadius:5, fill:true, tension:0.3},
+        {label:'Månadsavtalspris', data:fixedPrices.map(v=>+v.toFixed(2)), borderColor:'#d9880e', borderWidth:2, borderDash:[6,4], pointRadius:0, fill:false}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} öre/kWh`}}},
+      scales:{
+        x:{ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',autoSkip:false},grid:{display:false}},
+        y:{ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',callback:v=>v+' öre'},grid:{color:'rgba(0,0,0,0.06)'}}
+      }
+    }
+  });
+}
+
+function renderHeroAndTable() {
+  let spotGrand=0, fixedGrand=0, spotWins=0, fixedWins=0, equalCount=0;
+  const rows = YEARS.map(y => {
+    const {spotTotal, fixedTotal} = calcYear(y);
+    const diff = fixedTotal - spotTotal;
+    spotGrand += spotTotal; fixedGrand += fixedTotal;
+    let badge, cls;
+    if (Math.abs(diff) < 80) { badge='Lika'; cls='be'; equalCount++; }
+    else if (diff > 0) { badge='Spot'; cls='bs'; spotWins++; }
+    else { badge='Fast'; cls='bf'; fixedWins++; }
+    const hiS = spotTotal < fixedTotal ? 'c-green':'';
+    const hiF = fixedTotal < spotTotal ? 'c-green':'';
+    return `<tr>
+      <td class="yr-td">${y}</td>
+      <td class="${hiS}">${Math.round(spotTotal)}</td>
+      <td class="${hiF}">${Math.round(fixedTotal)}</td>
+      <td class="${diff>80?'c-blue':diff<-80?'c-amber':''}">${diff>0?'+':''}${Math.round(diff)}</td>
+      <td><span class="badge ${cls}">${badge}</span></td>
+    </tr>`;
+  });
+  document.getElementById('tBody').innerHTML = rows.join('');
+
+  const grandDiff = fixedGrand - spotGrand;
+  const gtdCls = grandDiff > 0 ? 'c-blue' : grandDiff < 0 ? 'c-amber':'';
+  document.getElementById('tFoot').innerHTML = `<tr>
+    <td style="font-family:'Syne',sans-serif;font-weight:700;border-top:1.5px solid var(--border);">TOTALT</td>
+    <td style="font-family:'DM Mono',monospace;border-top:1.5px solid var(--border);font-weight:700;" class="${spotGrand<fixedGrand?'c-green':''}">${Math.round(spotGrand)}</td>
+    <td style="font-family:'DM Mono',monospace;border-top:1.5px solid var(--border);font-weight:700;" class="${fixedGrand<spotGrand?'c-green':''}">${Math.round(fixedGrand)}</td>
+    <td style="font-family:'DM Mono',monospace;border-top:1.5px solid var(--border);font-weight:700;" class="${gtdCls}">${grandDiff>0?'+':''}${Math.round(grandDiff)}</td>
+    <td style="border-top:1.5px solid var(--border);"></td>
+  </tr>`;
+
+  // Hero boxes
+  const grandDiffAbs = Math.abs(grandDiff);
+  const winnerLabel = grandDiff > 80 ? 'Spot billigare' : grandDiff < -80 ? 'Fast billigare' : 'Ungefär lika';
+  const winnerCls   = grandDiff > 80 ? 'c-blue' : grandDiff < -80 ? 'c-amber' : 'c-dark';
+  document.getElementById('heroBox').innerHTML = `
+    <div class="hero">
+      <div class="hero-cell">
+        <div class="hero-lbl">Spot vann</div>
+        <div class="hero-num c-blue">${spotWins}<span style="font-size:1rem;opacity:.6;"> / 11 år</span></div>
+        <div class="hero-sub">${equalCount} år lika, ${fixedWins} år fast</div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-lbl">Totalt sparar du med spot</div>
+        <div class="hero-num ${winnerCls}">${grandDiff>0?'+':''}${Math.round(grandDiff)} kr</div>
+        <div class="hero-sub">Under alla 11 år summerat</div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-lbl">Per år i snitt</div>
+        <div class="hero-num ${winnerCls}">${grandDiff>0?'+':''}${Math.round(grandDiff/11)} kr/år</div>
+        <div class="hero-sub">Positivt = spot billigare</div>
+      </div>
+    </div>`;
 
   // Verdict
   let vHtml;
-  if (Math.abs(diff) < 100) {
-    vHtml = `<div class="verdict v-equal">≈ Nästan likvärdig — skillnaden är ${Math.abs(diff).toFixed(0)} kr/år för ${selYear}. Välj det som känns tryggt.</div>`;
-  } else if (diff > 0) {
-    vHtml = `<div class="verdict v-spot">↓ Rörligt spot är <strong>${Math.round(diff)} kr/år</strong> billigare än månadsavtalet för ${selYear}.</div>`;
+  if (Math.abs(grandDiff/11) < 100) {
+    vHtml = `<div class="verdict v-equal">Ungefär likvärdig totalt sett — skillnaden är bara ${Math.round(Math.abs(grandDiff/11))} kr/år i snitt. Välj det som känns tryggast.<span class="small">Spot vann ${spotWins} år, månadsavtal vann ${fixedWins} år, ${equalCount} år var lika.</span></div>`;
+  } else if (grandDiff > 0) {
+    vHtml = `<div class="verdict v-spot">↓ Rörligt spot har historiskt sparat dig <strong>${Math.round(grandDiff/11)} kr/år</strong> (${Math.round(grandDiff)} kr totalt 2015–2025).<span class="small">Spot vann ${spotWins} av 11 år. Observera: de flesta åren efter 2021 var extremt volatila — 2022 var månadsavtal bättre.</span></div>`;
   } else {
-    vHtml = `<div class="verdict v-fixed">↓ Månadsavtal är <strong>${Math.round(-diff)} kr/år</strong> billigare än rörligt spot för ${selYear}.</div>`;
+    vHtml = `<div class="verdict v-fixed">↓ Månadsavtal hade sparat dig <strong>${Math.round(-grandDiff/11)} kr/år</strong> (${Math.round(-grandDiff)} kr totalt 2015–2025).<span class="small">Fast pris vann ${fixedWins} av 11 år. Leverantörens påslag på ${markup} öre/kWh är avgörande för resultatet.</span></div>`;
   }
   document.getElementById('verdictBox').innerHTML = vHtml;
 
-  // Monthly cost chart
-  const solSpotBg  = MONTHS.map((_,i)=>SOLAR.has(i)?'rgba(28,101,184,0.32)':'rgba(28,101,184,0.82)');
-  const solFixBg   = MONTHS.map((_,i)=>SOLAR.has(i)?'rgba(217,136,14,0.22)':'rgba(217,136,14,0.82)');
-
-  const cfg1 = {
-    type:'bar',
-    data:{
-      labels:MONTHS,
-      datasets:[
-        { label:'Rörligt spot', data:spotM.map(v=>Math.round(v)), backgroundColor:solSpotBg, borderColor:solSpotBg.map(c=>c.replace('0.82','1').replace('0.32','0.6')), borderWidth:1 },
-        { label:'Månadsavtal',  data:fixedM.map(v=>Math.round(v)), backgroundColor:solFixBg,  borderColor:solFixBg.map(c=>c.replace('0.82','1').replace('0.22','0.5')), borderWidth:1 }
-      ]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y>0?'':''}${Math.round(ctx.parsed.y)} kr${ctx.parsed.y<0?' (inkomst)':' (kostnad)'}` }}},
-      scales:{
-        x:{ ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',autoSkip:false}, grid:{color:'rgba(0,0,0,0.04)'} },
-        y:{ ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',callback:v=>v+' kr'}, grid:{color:'rgba(0,0,0,0.06)'} }
-      }
-    }
-  };
-  if (cMonthly) cMonthly.destroy();
-  cMonthly = new Chart(document.getElementById('chartMonthly'), cfg1);
-
-  // Spot price line
-  const ptColors = MONTHS.map((_,i)=>SOLAR.has(i)?'#d9880e':'#1c65b8');
-  const cfg2 = {
-    type:'line',
-    data:{
-      labels:MONTHS,
-      datasets:[
-        { label:'Spotpris', data:PRICES[selYear].map(v=>parseFloat(v.toFixed(2))), backgroundColor:'rgba(28,101,184,0.07)', borderColor:'#1c65b8', borderWidth:2, pointBackgroundColor:ptColors, pointBorderColor:ptColors, pointRadius:5, fill:true, tension:0.3 },
-        { label:'Fast pris', data:Array(12).fill(parseFloat(fixedP.toFixed(2))), borderColor:'#d9880e', borderWidth:2, borderDash:[6,4], pointRadius:0, fill:false }
-      ]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} öre/kWh` }}},
-      scales:{
-        x:{ ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',autoSkip:false}, grid:{display:false} },
-        y:{ ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',callback:v=>v+' öre'}, grid:{color:'rgba(0,0,0,0.06)'} }
-      }
-    }
-  };
-  if (cPrice) cPrice.destroy();
-  cPrice = new Chart(document.getElementById('chartPrice'), cfg2);
-}
-
-function renderOverview() {
-  const spotArr=[],fixArr=[];
-  YEARS.forEach(y=>{
-    const {spotTotal,fixedTotal}=calc(y);
-    spotArr.push(Math.round(spotTotal));
-    fixArr.push(Math.round(fixedTotal));
-  });
-
-  const cfg = {
+  // Overview chart
+  const spotYr = YEARS.map(y=>Math.round(calcYear(y).spotTotal));
+  const fixYr  = YEARS.map(y=>Math.round(calcYear(y).fixedTotal));
+  if (cO) cO.destroy();
+  cO = new Chart(document.getElementById('cO'),{
     type:'bar',
     data:{
       labels:YEARS,
       datasets:[
-        { label:'Rörligt spot', data:spotArr, backgroundColor:'rgba(28,101,184,0.8)', borderColor:'#1c65b8', borderWidth:1 },
-        { label:'Månadsavtal',  data:fixArr,  backgroundColor:'rgba(217,136,14,0.8)', borderColor:'#d9880e', borderWidth:1 }
+        {label:'Spot',       data:spotYr, backgroundColor:'rgba(28,101,184,0.8)', borderWidth:0},
+        {label:'Månadsavtal',data:fixYr,  backgroundColor:'rgba(217,136,14,0.8)', borderWidth:0}
       ]
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} kr` }}},
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} kr`}}},
       scales:{
-        x:{ ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',autoSkip:false}, grid:{color:'rgba(0,0,0,0.04)'} },
-        y:{ ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',callback:v=>v+' kr'}, grid:{color:'rgba(0,0,0,0.06)'} }
+        x:{ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',autoSkip:false},grid:{color:'rgba(0,0,0,0.04)'}},
+        y:{ticks:{font:{family:'DM Mono',size:11},color:'#6b7585',callback:v=>v+' kr'},grid:{color:'rgba(0,0,0,0.06)'}}
       }
     }
-  };
-  if (cOverview) cOverview.destroy();
-  cOverview = new Chart(document.getElementById('chartOverview'), cfg);
-
-  // Table
-  const rows = YEARS.map(y=>{
-    const {spotTotal,fixedTotal,avg,fixedP}=calc(y);
-    const diff = fixedTotal - spotTotal;
-    let badge,cls;
-    if (Math.abs(diff)<100){badge='Lika';cls='b-equal';}
-    else if (diff>0){badge='Spot';cls='b-spot';}
-    else{badge='Fast';cls='b-fixed';}
-    const hiS = spotTotal<fixedTotal?' c-green':'';
-    const hiF = fixedTotal<spotTotal?' c-green':'';
-    return `<tr>
-      <td class="yr-cell">${y}</td>
-      <td>${avg.toFixed(1)}</td>
-      <td>${fixedP.toFixed(1)}</td>
-      <td class="${hiS}">${Math.round(spotTotal)}</td>
-      <td class="${hiF}">${Math.round(fixedTotal)}</td>
-      <td class="${diff>100?' c-blue':diff<-100?' c-amber':''}">${diff>0?'+':''}${Math.round(diff)}</td>
-      <td><span class="badge ${cls}">${badge}</span></td>
-    </tr>`;
-  }).join('');
-  document.getElementById('ovBody').innerHTML = rows;
+  });
 }
 
-function updateAll() { renderMonthly(); renderOverview(); }
-
-function switchView(id, btn) {
-  document.querySelectorAll('.vtab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.vcontent').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('vc-'+id).classList.add('active');
-  if (id==='overview') renderOverview();
+function renderAll(){
+  renderHeroAndTable();
+  renderMonthly();
 }
 
-document.getElementById('sConsumption').addEventListener('input', e=>{
+/* ---- EVENTS ---- */
+document.getElementById('sC').addEventListener('input',e=>{
   consumption=+e.target.value;
-  document.getElementById('vConsumption').textContent=consumption+' kWh';
-  updateAll();
+  document.getElementById('vC').textContent=consumption+' kWh';
+  renderAll();
 });
-document.getElementById('sMarkup').addEventListener('input', e=>{
+document.getElementById('sM').addEventListener('input',e=>{
   markup=+e.target.value;
-  document.getElementById('vMarkup').textContent=markup+' öre/kWh';
-  updateAll();
+  document.getElementById('vM').textContent=markup+' öre/kWh';
+  renderAll();
 });
-document.getElementById('sExport').addEventListener('input', e=>{
-  exportPct=e.target.value/100;
-  document.getElementById('vExport').textContent=e.target.value+'%';
-  updateAll();
+document.getElementById('sY').addEventListener('input',e=>{
+  selIdx=+e.target.value;
+  document.getElementById('yrDisp').textContent=YEARS[selIdx];
+  renderMonthly();
 });
 
-buildYearStrip();
-updateAll();
+/* ---- INIT ---- */
+renderAll();
 </script>
 </body>
 </html>
