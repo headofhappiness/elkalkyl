@@ -213,7 +213,13 @@ footer{text-align:center;padding:2rem 1.25rem;font-size:.68rem;color:var(--muted
     <div class="intra-ctrl">
       <div class="ctrl-head"><span class="ctrl-lbl" style="color:#fff;">Inköpspris (% av månadsmedel)</span><span class="ctrl-val" id="vBF">112%</span></div>
       <input type="range" id="sBF" min="100" max="140" step="1" value="112">
-      <div class="ctrl-desc">Spotpris när ni köper el (morgon/kväll) jämfört med månadsmedel. Gäller bara rörligt spot — månadsavtal ger fast pris dygnet runt.</div>
+      <div class="ctrl-desc">Spotpris när ni köper el (morgon/kväll) jämfört med månadsmedel. Gäller spot — månadsavtal ger fast pris dygnet runt.</div>
+    </div>
+
+    <div class="intra-ctrl">
+      <div class="ctrl-head"><span class="ctrl-lbl" style="color:#fff;">Nattandel under solmånader</span><span class="ctrl-val" id="vNF">67%</span></div>
+      <input type="range" id="sNF" min="40" max="85" step="1" value="67">
+      <div class="ctrl-desc">Andel av er förbrukning som sker på natten (när solcellerna inte producerar) under apr–sep. Standard 67% = 16 av 24h. Ni köper den andelen från nätet även på sommaren — och där spelar avtalet roll!</div>
     </div>
 
     <div class="impact-arrow" id="intraSummary">
@@ -236,7 +242,7 @@ footer{text-align:center;padding:2rem 1.25rem;font-size:.68rem;color:var(--muted
         <div class="flow-arr" style="color:var(--green);">→</div>
         <div class="flow-box grid"><span class="flow-icon">⚡</span><span class="flow-lbl">Säljer</span><span class="flow-num c-green" id="fExp">500 kWh</span></div>
       </div>
-      <p style="font-size:.73rem;color:var(--muted);">Båda avtal ger spotpriset vid export. Men med dagspriseffekt säljer ni vid ~<span id="fSellPct">85</span>% av månadsmedel.</p>
+      <p id="summerNote" style="font-size:.73rem;color:var(--muted);">Ni säljer ~835 kWh/mån på dagen (vid <span id="fSellPct">85</span>% av spotpris) och köper ~335 kWh/mån på natten. Avtalet påverkar nattpriset!</p>
     </div>
     <div id="flowWinter" style="display:none;">
       <div class="flow">
@@ -258,7 +264,7 @@ footer{text-align:center;padding:2rem 1.25rem;font-size:.68rem;color:var(--muted
   <div class="card">
     <div class="card-ttl">Rekommendation per månad</div>
     <div class="assume">
-      Solmånader apr–sep: ingen skillnad på avtal — ni säljer alltid till spotpris. Nedan visas <strong>bara köpmånaderna</strong> (okt–mar). Dagspriseffekten är inräknad.
+      Alla 12 månader visas. <strong>Solmånader (apr–sep)</strong>: båda avtal ger spotpriset vid export — ingen skillnad. <strong>Köpmånader (okt–mar)</strong>: här spelar avtalet roll. Tryck på en månad för detaljer. Dagspriseffekten är inräknad.
     </div>
     <div class="rec-grid" id="recGrid"></div>
   </div>
@@ -281,7 +287,7 @@ footer{text-align:center;padding:2rem 1.25rem;font-size:.68rem;color:var(--muted
     <div class="yr-sel">
       <div class="yr-num" id="yrNum">2024</div>
       <div class="yr-slider">
-        <input type="range" id="sY" min="0" max="10" step="1" value="9" style="accent-color:var(--dark);">
+        <input type="range" id="sY" min="0" max="11" step="1" value="10" style="accent-color:var(--dark);">
         <div class="yr-labs"><span>2015</span><span>2025</span></div>
       </div>
     </div>
@@ -328,6 +334,7 @@ footer{text-align:center;padding:2rem 1.25rem;font-size:.68rem;color:var(--muted
 <footer>Priskälla: Nordpool via elpriser.nu · SE3 · Exkl. elcertifikat, energiskatt, moms och elnätskostnader</footer>
 
 <script>
+/* ── DATA ── */
 const PRICES={
   2015:[28.53,28.07,23.94,23.82,20.94,14.18,8.50,15.87,19.65,22.09,24.01,18.18],
   2016:[28.77,18.30,20.07,20.32,21.98,31.48,27.42,28.94,27.94,35.11,40.41,32.24],
@@ -339,42 +346,49 @@ const PRICES={
   2022:[104.33,77.48,130.33,89.22,102.86,126.31,86.61,223.05,228.63,80.65,130.88,269.02],
   2023:[92.58,82.54,80.62,68.70,39.02,53.06,37.65,36.96,24.32,33.06,82.13,79.18],
   2024:[80.30,50.34,59.47,56.31,23.71,27.27,20.72,8.54,16.44,22.97,66.95,58.25],
-  2025:[63.44,77.05,50.81,37.61,42.94,22.79,37.01,48.56,52.33,62.81,69.65,51.68]
+  2025:[63.44,77.05,50.81,37.61,42.94,22.79,37.01,48.56,52.33,62.81,69.65,51.68],
+  2026:[108.45,110.23,58.66,56.08,86.15,null,null,null,null,null,null,null]
 };
 const MO=['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
 const SOLAR=new Set([3,4,5,6,7,8]);
-const BUY=[0,1,2,9,10,11];
 const YEARS=Object.keys(PRICES).map(Number).sort();
+const FULL_YEARS=YEARS.filter(y=>!PRICES[y].includes(null));
 
-let consumption=500, markup=5, sellFactor=0.85, buyFactor=1.12, selIdx=9;
+/* ── STATE ── */
+let consumption=500, markup=5, sellFactor=0.85, buyFactor=1.12, nightFrac=0.67, selIdx=11;
 
-/* Fixed price: previous month spot + markup */
+/* ── HELPERS ── */
+function isPartial(y){ return PRICES[y].includes(null); }
+
 function fixedPrices(year){
-  const sp=PRICES[year],prev=PRICES[year-1];
-  return sp.map((_,m)=>{
-    const base=m===0?(prev?prev[11]:sp.reduce((a,b)=>a+b,0)/12):sp[m-1];
-    return base+markup;
+  const sp=PRICES[year], prev=PRICES[year-1];
+  const validSp=sp.filter(v=>v!==null);
+  const fallback=validSp.reduce((a,b)=>a+b,0)/validSp.length;
+  return sp.map((v,m)=>{
+    if(v===null) return null;
+    let base;
+    if(m===0) base=prev ? prev[11] : fallback;
+    else      base=sp[m-1]!==null ? sp[m-1] : fallback;
+    return (base||fallback)+markup;
   });
 }
 
-/* Core calc — applies sell/buy factors to spot only.
-   Fixed contract = flat price regardless of time of day. */
 function calcYear(year){
   const sp=PRICES[year], fp=fixedPrices(year);
   let sT=0,fT=0; const sM=[],fM=[];
   for(let m=0;m<12;m++){
+    if(sp[m]===null){ sM.push(null);fM.push(null);continue; }
     if(SOLAR.has(m)){
-      // Both sell at spot, but effective sell price = spot * sellFactor
-      const inc=-(sp[m]*sellFactor*consumption)/100;
-      sM.push(inc);fM.push(inc);
-      sT+=inc;fT+=inc;
+      const buyKwh=nightFrac*consumption, sellKwh=(1+nightFrac)*consumption;
+      const sBuy=(sp[m]*buyFactor*buyKwh)/100, sSell=-(sp[m]*sellFactor*sellKwh)/100;
+      const fBuy=(fp[m]*buyKwh)/100,           fSell=-(sp[m]*sellFactor*sellKwh)/100;
+      sM.push(sBuy+sSell); fM.push(fBuy+fSell);
+      sT+=sBuy+sSell;      fT+=fBuy+fSell;
     }else{
-      // Spot: buy at spot * buyFactor
-      // Fixed: flat fp[m], no time-of-day factor
       const sc=(sp[m]*buyFactor*consumption)/100;
       const fc=(fp[m]*consumption)/100;
-      sM.push(sc);fM.push(fc);
-      sT+=sc;fT+=fc;
+      sM.push(sc); fM.push(fc);
+      sT+=sc; fT+=fc;
     }
   }
   return{sT,fT,sM,fM,sp,fp};
@@ -382,34 +396,78 @@ function calcYear(year){
 
 /* ── INTRADAY SUMMARY ── */
 function renderIntraSummary(){
-  // What's the net effect of the intraday factors vs neutral (1.0 for both)?
-  let baseSpot=0, adjSpot=0;
-  YEARS.forEach(y=>{
-    const sp=PRICES[y];
+  let base=0, adj=0;
+  FULL_YEARS.forEach(y=>{
+    const sp=PRICES[y], fp=fixedPrices(y);
     for(let m=0;m<12;m++){
       if(SOLAR.has(m)){
-        baseSpot+=-(sp[m]*1.0*consumption)/100;
-        adjSpot+=-(sp[m]*sellFactor*consumption)/100;
+        const bK=nightFrac*consumption, sK=(1+nightFrac)*consumption;
+        base+=(sp[m]*1.0*bK/100)-(sp[m]*1.0*sK/100);
+        adj +=(sp[m]*buyFactor*bK/100)-(sp[m]*sellFactor*sK/100);
       }else{
-        baseSpot+=(sp[m]*1.0*consumption)/100;
-        adjSpot+=(sp[m]*buyFactor*consumption)/100;
+        base+=(sp[m]*consumption/100);
+        adj +=(sp[m]*buyFactor*consumption/100);
       }
     }
   });
-  const delta=(adjSpot-baseSpot)/YEARS.length;
+  const delta=(adj-base)/FULL_YEARS.length;
   const dir=delta>0?'dyrare':'billigare';
-  const cls=delta>0?'style="color:#f5a623;"':'style="color:#7aadee;"';
+  const col=delta>0?'#f5a623':'#7aadee';
   document.getElementById('intraSummary').innerHTML=
-    `Med dessa dagsprisfaktorer blir rörligt spot <strong ${cls}>${Math.round(Math.abs(delta))} kr/år ${dir}</strong> jämfört med ett neutralt månadsmedel. Påslaget gynnar månadsavtalet vid köp, men sänker intäkten vid export.`;
+    `Med dessa dagsprisfaktorer blir rörligt spot <strong style="color:${col}">${Math.round(Math.abs(delta))} kr/år ${dir}</strong> jämfört med ett neutralt månadsmedel. Solmånader påverkas nu också — ni köper ${Math.round(nightFrac*100)}% av er förbrukning på natten även på sommaren.`;
 }
 
 /* ── RECS PER MONTH ── */
 function renderRecs(){
-  const html=BUY.map(m=>{
+  const nY=FULL_YEARS.length;
+  const html=Array.from({length:12},(_,m)=>{
+    // Only count years where this month has data
+    const availY=YEARS.filter(y=>PRICES[y][m]!==null);
+    const n=availY.length;
     let sW=0,fW=0,eq=0,totDiff=0;
     const pills=[];
-    YEARS.forEach(y=>{
-      const sp=PRICES[y][m],fp=fixedPrices(y)[m];
+
+    if(SOLAR.has(m)){
+      const buyKwh=nightFrac*consumption, sellKwh=(1+nightFrac)*consumption;
+      availY.forEach(y=>{
+        const sp=PRICES[y][m], fp=fixedPrices(y)[m];
+        const sNet=(sp*buyFactor*buyKwh)/100-(sp*sellFactor*sellKwh)/100;
+        const fNet=(fp*buyKwh)/100-(sp*sellFactor*sellKwh)/100;
+        const diff=fNet-sNet;
+        if(Math.abs(diff)<5){eq++;pills.push({y,cls:'ry-eq'});}
+        else if(diff>0){sW++;totDiff+=diff;pills.push({y,cls:'ry-spot'});}
+        else{fW++;totDiff+=diff;pills.push({y,cls:'ry-fixed'});}
+      });
+      const avg=n>0?totDiff/n:0;
+      const avgInc=availY.reduce((s,y)=>{
+        const sp=PRICES[y][m];
+        return s+(sp*sellFactor*sellKwh/100-sp*buyFactor*buyKwh/100);
+      },0)/Math.max(n,1);
+      const thresh=Math.ceil(n*0.7);
+      let badge,bCls,advice;
+      if(sW>=thresh){badge='Håll spot';bCls='rb-spot';advice=`Spot var billigare <strong>${sW}/${n} år</strong>, snitt ${Math.round(avg)} kr/mån. Nattköpen gynnar spot.`;}
+      else if(fW>=thresh){badge='Troligen fast';bCls='rb-fixed';advice=`Fast var billigare <strong>${fW}/${n} år</strong>, snitt ${Math.round(-avg)} kr/mån. Nattköpen gynnar fast avtal.`;}
+      else if(sW>fW+1){badge='Svagt spot';bCls='rb-spot';advice=`Spot vann ${sW} vs ${fW} år. Liten fördel (${Math.round(avg)} kr/mån).`;}
+      else if(fW>sW+1){badge='Svagt fast';bCls='rb-fixed';advice=`Fast vann ${fW} vs ${sW} år. Liten fördel (${Math.round(-avg)} kr/mån).`;}
+      else{badge='Osäkert';bCls='rb-equal';advice=`Jämnt — spot ${sW} år, fast ${fW} år. Ingen tydlig fördel.`;}
+      const sPct=Math.round(sW/n*100), fPct=Math.round(fW/n*100);
+      const pillsH=pills.map(p=>`<span class="ry-pill ${p.cls}">${p.y}</span>`).join('');
+      return`<div class="rec-row" style="border-color:#f5c878;">
+        <div class="rec-head" onclick="this.nextElementSibling.classList.toggle('open')" style="background:#fffbf0;">
+          <div class="rec-month" style="color:var(--solar);">☀ ${MO[m]}</div>
+          <div>
+            <div class="rec-bar-wrap"><div class="rec-bar-spot" style="width:${sPct}%;"></div><div class="rec-bar-fixed" style="left:${sPct}%;width:${fPct}%;"></div></div>
+            <div style="font-size:.62rem;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;">Spot ${sW}/${n} · Fast ${fW}/${n} · Lika ${eq}/${n} · Inkomst ~${Math.round(avgInc)} kr/mån</div>
+          </div>
+          <span class="rec-badge ${bCls}">${badge}</span>
+        </div>
+        <div class="rec-detail"><div class="rec-detail-inner">${advice}<br><span style="font-size:.72rem;opacity:.7;">Ni säljer ${Math.round(sellKwh)} kWh/mån på dagen, men köper ${Math.round(buyKwh)} kWh/mån på natten — avtalet påverkar nattpriset.</span><div class="rec-years">${pillsH}</div></div></div>
+      </div>`;
+    }
+
+    // Buy month
+    availY.forEach(y=>{
+      const sp=PRICES[y][m], fp=fixedPrices(y)[m];
       const sc=(sp*buyFactor*consumption)/100;
       const fc=(fp*consumption)/100;
       const diff=fc-sc;
@@ -417,25 +475,22 @@ function renderRecs(){
       else if(diff>0){sW++;totDiff+=diff;pills.push({y,cls:'ry-spot'});}
       else{fW++;totDiff+=diff;pills.push({y,cls:'ry-fixed'});}
     });
-    const tot=YEARS.length;
-    const avg=totDiff/tot;
+    const avg=n>0?totDiff/n:0;
+    const thresh=Math.ceil(n*0.7);
     let badge,bCls,advice;
-    if(sW>=8){badge='Håll spot';bCls='rb-spot';advice=`Spot var billigare <strong>${sW}/11 år</strong>, i snitt ${Math.round(avg)} kr/mån.`;}
-    else if(fW>=8){badge='Välj fast';bCls='rb-fixed';advice=`Fast var billigare <strong>${fW}/11 år</strong>, i snitt ${Math.round(-avg)} kr/mån. Överväg att byta.`;}
-    else if(sW>fW+1){badge='Troligen spot';bCls='rb-spot';advice=`Spot vann oftare (${sW} vs ${fW} år). Snittbesparing med spot: ${Math.round(avg)} kr/mån.`;}
-    else if(fW>sW+1){badge='Troligen fast';bCls='rb-fixed';advice=`Fast vann oftare (${fW} vs ${sW} år). Snittbesparing med fast: ${Math.round(-avg)} kr/mån.`;}
-    else{badge='Osäkert';bCls='rb-equal';advice=`Jämnt — spot vann ${sW} år, fast ${fW} år.`;}
-    const sPct=Math.round(sW/tot*100), fPct=Math.round(fW/tot*100);
+    if(sW>=thresh){badge='Håll spot';bCls='rb-spot';advice=`Spot var billigare <strong>${sW}/${n} år</strong>, i snitt ${Math.round(avg)} kr/mån.`;}
+    else if(fW>=thresh){badge='Välj fast';bCls='rb-fixed';advice=`Fast var billigare <strong>${fW}/${n} år</strong>, i snitt ${Math.round(-avg)} kr/mån. Överväg att byta.`;}
+    else if(sW>fW+1){badge='Troligen spot';bCls='rb-spot';advice=`Spot vann oftare (${sW} vs ${fW} år). Snittbesparing: ${Math.round(avg)} kr/mån.`;}
+    else if(fW>sW+1){badge='Troligen fast';bCls='rb-fixed';advice=`Fast vann oftare (${fW} vs ${sW} år). Snittbesparing: ${Math.round(-avg)} kr/mån.`;}
+    else{badge='Osäkert';bCls='rb-equal';advice=`Jämnt — spot ${sW} år, fast ${fW} år. Ingen tydlig fördel historiskt.`;}
+    const sPct=Math.round(sW/n*100), fPct=Math.round(fW/n*100);
     const pillsH=pills.map(p=>`<span class="ry-pill ${p.cls}">${p.y}</span>`).join('');
     return`<div class="rec-row">
       <div class="rec-head" onclick="this.nextElementSibling.classList.toggle('open')">
         <div class="rec-month">${MO[m]}</div>
         <div>
-          <div class="rec-bar-wrap">
-            <div class="rec-bar-spot" style="width:${sPct}%;"></div>
-            <div class="rec-bar-fixed" style="left:${sPct}%;width:${fPct}%;"></div>
-          </div>
-          <div style="font-size:.62rem;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;">Spot ${sW}/11 · Fast ${fW}/11 · Lika ${eq}/11</div>
+          <div class="rec-bar-wrap"><div class="rec-bar-spot" style="width:${sPct}%;"></div><div class="rec-bar-fixed" style="left:${sPct}%;width:${fPct}%;"></div></div>
+          <div style="font-size:.62rem;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;">Spot ${sW}/${n} · Fast ${fW}/${n} · Lika ${eq}/${n}</div>
         </div>
         <span class="rec-badge ${bCls}">${badge}</span>
       </div>
@@ -450,11 +505,25 @@ function renderHeatmap(){
   let thead=`<thead><tr><th></th>${MO.map(m=>`<th>${m.substring(0,3)}</th>`).join('')}</tr></thead>`;
   let tbody='<tbody>';
   YEARS.forEach(y=>{
-    const sp=PRICES[y],fp=fixedPrices(y);
-    tbody+=`<tr><td class="yr-lbl">${y}</td>`;
+    const sp=PRICES[y], fp=fixedPrices(y);
+    const partialY=isPartial(y);
+    tbody+=`<tr><td class="yr-lbl">${y}${partialY?'*':''}</td>`;
     for(let m=0;m<12;m++){
-      if(SOLAR.has(m)){tbody+=`<td><span class="hm-cell hm-solar">☀</span></td>`;}
-      else{
+      if(sp[m]===null){
+        tbody+=`<td><span class="hm-cell hm-eq" style="opacity:.25;">–</span></td>`;
+        continue;
+      }
+      if(SOLAR.has(m)){
+        const buyKwh=nightFrac*consumption, sellKwh=(1+nightFrac)*consumption;
+        const sc=(sp[m]*buyFactor*buyKwh)/100-(sp[m]*sellFactor*sellKwh)/100;
+        const fc=(fp[m]*buyKwh)/100-(sp[m]*sellFactor*sellKwh)/100;
+        const diff=fc-sc;
+        let cls,txt;
+        if(Math.abs(diff)<5){cls='hm-eq';txt='=';}
+        else if(diff>0){cls='hm-spot';txt='S';}
+        else{cls='hm-fixed';txt='F';}
+        tbody+=`<td><span class="hm-cell ${cls}" title="☀ ${MO[m]} ${y}: Spot ${Math.round(sc)} kr, Fast ${Math.round(fc)} kr">${txt}</span></td>`;
+      }else{
         const sc=(sp[m]*buyFactor*consumption)/100;
         const fc=(fp[m]*consumption)/100;
         const diff=fc-sc;
@@ -467,7 +536,7 @@ function renderHeatmap(){
     }
     tbody+='</tr>';
   });
-  tbody+='</tbody>';
+  tbody+=`</tbody><tfoot><tr><td colspan="13" style="font-size:.62rem;color:var(--muted);padding:.4rem .2rem;">S=Spot billigare · F=Fast billigare · *=Delår (data t.o.m. maj)</td></tr></tfoot>`;
   document.getElementById('hmapTable').innerHTML=thead+tbody;
 }
 
@@ -475,21 +544,23 @@ function renderHeatmap(){
 function renderMonthly(){
   const year=YEARS[selIdx];
   const{sT,fT,sM,fM}=calcYear(year);
-  document.getElementById('mTtl').textContent=`Månadsöversikt ${year}`;
+  document.getElementById('mTtl').textContent=`Månadsöversikt ${year}${isPartial(year)?' (delår jan–maj)':''}`;
   document.getElementById('yrNum').textContent=year;
   const diff=fT-sT;
   let vHtml;
-  if(Math.abs(diff)<80) vHtml=`<div class="verdict v-equal">≈ ${year}: Lika — ${Math.round(Math.abs(diff))} kr skillnad</div>`;
-  else if(diff>0) vHtml=`<div class="verdict v-spot">↓ ${year}: Spot sparade <strong>${Math.round(diff)} kr</strong></div>`;
-  else vHtml=`<div class="verdict v-fixed">↓ ${year}: Fast sparade <strong>${Math.round(-diff)} kr</strong></div>`;
+  if(Math.abs(diff)<80) vHtml=`<div class="verdict v-equal">≈ ${year}: Lika — ${Math.round(Math.abs(diff))} kr skillnad${isPartial(year)?' (jan–maj)':''}</div>`;
+  else if(diff>0) vHtml=`<div class="verdict v-spot">↓ ${year}: Spot sparade <strong>${Math.round(diff)} kr</strong>${isPartial(year)?' (jan–maj)':''}</div>`;
+  else vHtml=`<div class="verdict v-fixed">↓ ${year}: Fast sparade <strong>${Math.round(-diff)} kr</strong>${isPartial(year)?' (jan–maj)':''}</div>`;
   document.getElementById('yrVerdict').innerHTML=vHtml;
 
-  const maxA=Math.max(...sM.map(v=>Math.abs(v)),...fM.map(v=>Math.abs(v)));
+  const validVals=[...sM,...fM].filter(v=>v!==null).map(Math.abs);
+  const maxA=Math.max(...validVals,1);
   const rows=MO.map((mo,i)=>{
+    if(sM[i]===null) return`<div class="mrow" style="opacity:.25;"><div class="mname">${mo}</div><div class="mono" style="font-size:.73rem;grid-column:span 3;color:var(--muted);">Ingen data ännu</div></div>`;
     const sv=Math.round(sM[i]),fv=Math.round(fM[i]),isSol=SOLAR.has(i);
     const mdiff=fv-sv;
-    const ds=isSol?'<span style="opacity:.3">–</span>':(mdiff===0?'–':mdiff>0?`<span class="c-blue">+${mdiff}</span>`:`<span class="c-amber">${mdiff}</span>`);
-    const pS=Math.min(100,Math.abs(sv)/maxA*100),pF=Math.min(100,Math.abs(fv)/maxA*100);
+    const ds=mdiff===0?'–':mdiff>0?`<span class="c-blue">+${mdiff}</span>`:`<span class="c-amber">${mdiff}</span>`;
+    const pS=Math.min(100,Math.abs(sv)/maxA*100), pF=Math.min(100,Math.abs(fv)/maxA*100);
     const bS=isSol?'rgba(245,166,35,0.55)':'rgba(28,101,184,0.75)';
     const bF=isSol?'rgba(245,166,35,0.25)':'rgba(217,136,14,0.75)';
     const dot=isSol?'<span class="solar-dot"></span>':'';
@@ -498,7 +569,7 @@ function renderMonthly(){
       <div class="mname">${dot}${mo}</div>
       <div><div class="bar-wrap"><div class="bar-fill" style="width:${pS}%;background:${bS};"></div></div><div class="mono ${vc}" style="font-size:.73rem;margin-top:2px;">${sv} kr</div></div>
       <div><div class="bar-wrap"><div class="bar-fill" style="width:${pF}%;background:${bF};"></div></div><div class="mono ${vc}" style="font-size:.73rem;margin-top:2px;">${fv} kr</div></div>
-      <div class="mono" style="font-size:.73rem;">${ds}</div>
+      <div class="mono" style="font-size:.73rem;">${isSol?ds:ds}</div>
     </div>`;
   }).join('');
   document.getElementById('mRows').innerHTML=rows;
@@ -508,22 +579,34 @@ function renderMonthly(){
 let cO=null;
 function renderOverview(){
   let sG=0,fG=0,sW=0,fW=0,eqC=0;
-  const sYr=[],fYr=[];
+  const sYr=[],fYr=[],yLabels=[];
   const rows=YEARS.map(y=>{
     const{sT,fT}=calcYear(y);
-    sG+=sT;fG+=fT;
-    sYr.push(Math.round(sT));fYr.push(Math.round(fT));
+    const partial=isPartial(y);
+    sG+=sT; fG+=fT;
+    sYr.push(Math.round(sT)); fYr.push(Math.round(fT));
+    yLabels.push(partial?`${y}*`:String(y));
     const diff=fT-sT;
     let badge,cls;
-    if(Math.abs(diff)<80){badge='Lika';cls='be';eqC++;}
-    else if(diff>0){badge='Spot';cls='bs';sW++;}
-    else{badge='Fast';cls='bf';fW++;}
-    const hS=sT<fT?' c-green':'',hF=fT<sT?' c-green':'';
-    return`<tr><td class="yr-td">${y}</td><td class="${hS}">${Math.round(sT)}</td><td class="${hF}">${Math.round(fT)}</td><td class="${diff>80?'c-blue':diff<-80?'c-amber':''}">${diff>0?'+':''}${Math.round(diff)}</td><td><span class="badge ${cls}">${badge}</span></td></tr>`;
+    if(Math.abs(diff)<80){badge='Lika';cls='be';if(!partial)eqC++;}
+    else if(diff>0){badge='Spot';cls='bs';if(!partial)sW++;}
+    else{badge='Fast';cls='bf';if(!partial)fW++;}
+    const hS=sT<fT?' c-green':'', hF=fT<sT?' c-green':'';
+    const partTag=partial?` <span style="font-size:.6rem;color:var(--amber);">delår</span>`:'';
+    const noteTag=partial?` <span style="font-size:.62rem;color:var(--muted);">(jan–maj)</span>`:'';
+    return`<tr>
+      <td class="yr-td">${y}${partTag}</td>
+      <td class="${hS}">${Math.round(sT)}${noteTag}</td>
+      <td class="${hF}">${Math.round(fT)}</td>
+      <td class="${diff>80?'c-blue':diff<-80?'c-amber':''}">${diff>0?'+':''}${Math.round(diff)}</td>
+      <td><span class="badge ${cls}">${badge}</span></td>
+    </tr>`;
   });
   document.getElementById('tBody').innerHTML=rows.join('');
+
+  const n=FULL_YEARS.length;
   const gd=fG-sG;
-  const hSg=sG<fG?' c-green':'',hFg=fG<sG?' c-green':'';
+  const hSg=sG<fG?' c-green':'', hFg=fG<sG?' c-green':'';
   document.getElementById('tFoot').innerHTML=`<tr style="border-top:1.5px solid var(--border);">
     <td class="yr-td">TOTALT</td>
     <td class="${hSg}" style="font-weight:700;">${Math.round(sG)}</td>
@@ -531,20 +614,25 @@ function renderOverview(){
     <td class="${gd>80?'c-blue':gd<-80?'c-amber':''}" style="font-weight:700;">${gd>0?'+':''}${Math.round(gd)}</td>
     <td></td>
   </tr>`;
+
   const gCls=gd>80?'c-blue':gd<-80?'c-amber':'c-dark';
   document.getElementById('scoresBox').innerHTML=`
-    <div class="score"><div class="score-num c-blue">${sW}<span style="font-size:1rem;opacity:.5;">/11</span></div><div class="score-lbl">Spot vann</div><div class="score-sub">${fW} fast · ${eqC} lika</div></div>
-    <div class="score"><div class="score-num ${gCls}">${gd>0?'+':''}${Math.round(gd/11)}</div><div class="score-lbl">kr/år med spot</div><div class="score-sub">Positivt = spot billigare</div></div>`;
+    <div class="score"><div class="score-num c-blue">${sW}<span style="font-size:1rem;opacity:.5;">/${n}</span></div><div class="score-lbl">Spot vann</div><div class="score-sub">${fW} fast · ${eqC} lika (hela år)</div></div>
+    <div class="score"><div class="score-num ${gCls}">${gd>0?'+':''}${Math.round(gd/n)}</div><div class="score-lbl">kr/år med spot</div><div class="score-sub">Snitt hela år 2015–2025</div></div>`;
+
   let vHtml;
-  if(Math.abs(gd/11)<100) vHtml=`<div class="verdict v-equal">≈ Historiskt ungefär likvärdig — ${Math.round(Math.abs(gd/11))} kr/år i snitt.<span class="vsub">Se månadsrekommendationerna nedan.</span></div>`;
-  else if(gd>0) vHtml=`<div class="verdict v-spot">↓ Spot hade sparat <strong>${Math.round(gd/11)} kr/år</strong> totalt 2015–2025.<span class="vsub">Spot vann ${sW}/11 år. Se månadsrekommendationerna nedan.</span></div>`;
-  else vHtml=`<div class="verdict v-fixed">↓ Fast hade sparat <strong>${Math.round(-gd/11)} kr/år</strong> totalt 2015–2025.<span class="vsub">Fast vann ${fW}/11 år. Dagspriseffekten gynnar månadsavtalet.</span></div>`;
+  if(Math.abs(gd/n)<100) vHtml=`<div class="verdict v-equal">≈ Historiskt ungefär likvärdig — ${Math.round(Math.abs(gd/n))} kr/år i snitt.<span class="vsub">Se månadsrekommendationerna nedan. 2026 är ett delår (jan–maj).</span></div>`;
+  else if(gd>0) vHtml=`<div class="verdict v-spot">↓ Spot hade sparat <strong>${Math.round(gd/n)} kr/år</strong> i snitt 2015–2025.<span class="vsub">Spot vann ${sW}/${n} hela år. Se månadsrekommendationerna nedan.</span></div>`;
+  else vHtml=`<div class="verdict v-fixed">↓ Fast hade sparat <strong>${Math.round(-gd/n)} kr/år</strong> i snitt 2015–2025.<span class="vsub">Fast vann ${fW}/${n} hela år. Dagspriseffekten gynnar månadsavtalet.</span></div>`;
   document.getElementById('verdictBox').innerHTML=vHtml;
+
+  const bgSpot=yLabels.map(l=>l.includes('*')?'rgba(28,101,184,0.45)':'rgba(28,101,184,0.8)');
+  const bgFast=yLabels.map(l=>l.includes('*')?'rgba(217,136,14,0.45)':'rgba(217,136,14,0.8)');
   if(cO)cO.destroy();
   cO=new Chart(document.getElementById('cO'),{type:'bar',
-    data:{labels:YEARS,datasets:[
-      {label:'Spot',data:sYr,backgroundColor:'rgba(28,101,184,0.8)',borderWidth:0},
-      {label:'Fast',data:fYr,backgroundColor:'rgba(217,136,14,0.8)',borderWidth:0}
+    data:{labels:yLabels,datasets:[
+      {label:'Spot',data:sYr,backgroundColor:bgSpot,borderWidth:0},
+      {label:'Fast',data:fYr,backgroundColor:bgFast,borderWidth:0}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} kr`}}},
@@ -556,14 +644,18 @@ function renderOverview(){
   });
 }
 
+/* ── FLOW NUMBERS ── */
 function updateFlowNumbers(){
+  const buyKwh=Math.round(nightFrac*consumption), sellKwh=Math.round((1+nightFrac)*consumption);
   document.getElementById('fProd').textContent=(consumption*2).toLocaleString('sv')+' kWh';
   document.getElementById('fCons').textContent=consumption.toLocaleString('sv')+' kWh';
-  document.getElementById('fExp').textContent=consumption.toLocaleString('sv')+' kWh';
+  document.getElementById('fExp').textContent=sellKwh.toLocaleString('sv')+' kWh säljs';
   document.getElementById('fBuy').textContent=consumption.toLocaleString('sv')+' kWh';
   document.getElementById('fCons2').textContent=consumption.toLocaleString('sv')+' kWh';
   document.getElementById('fSellPct').textContent=Math.round(sellFactor*100);
   document.getElementById('fBuyPct').textContent=Math.round(buyFactor*100);
+  const sumNote=document.getElementById('summerNote');
+  if(sumNote) sumNote.textContent=`Ni säljer ${sellKwh} kWh/mån på dagen (vid ${Math.round(sellFactor*100)}% av spotpris) och köper ${buyKwh} kWh/mån på natten. Avtalet påverkar nattpriset!`;
 }
 
 function toggleSeason(s,btn){
@@ -582,20 +674,12 @@ function renderAll(){
   renderMonthly();
 }
 
+/* ── EVENTS ── */
 document.getElementById('sC').addEventListener('input',e=>{consumption=+e.target.value;document.getElementById('vC').textContent=consumption.toLocaleString('sv')+' kWh/mån';renderAll();});
 document.getElementById('sM').addEventListener('input',e=>{markup=+e.target.value;document.getElementById('vM').textContent=markup+' öre/kWh';renderAll();});
-document.getElementById('sSF').addEventListener('input',e=>{
-  sellFactor=e.target.value/100;
-  document.getElementById('vSF').textContent=e.target.value+'%';
-  document.getElementById('ibSellNum').textContent=e.target.value+'%';
-  renderAll();
-});
-document.getElementById('sBF').addEventListener('input',e=>{
-  buyFactor=e.target.value/100;
-  document.getElementById('vBF').textContent=e.target.value+'%';
-  document.getElementById('ibBuyNum').textContent=e.target.value+'%';
-  renderAll();
-});
+document.getElementById('sSF').addEventListener('input',e=>{sellFactor=e.target.value/100;document.getElementById('vSF').textContent=e.target.value+'%';document.getElementById('ibSellNum').textContent=e.target.value+'%';renderAll();});
+document.getElementById('sBF').addEventListener('input',e=>{buyFactor=e.target.value/100;document.getElementById('vBF').textContent=e.target.value+'%';document.getElementById('ibBuyNum').textContent=e.target.value+'%';renderAll();});
+document.getElementById('sNF').addEventListener('input',e=>{nightFrac=e.target.value/100;document.getElementById('vNF').textContent=e.target.value+'%';renderAll();});
 document.getElementById('sY').addEventListener('input',e=>{selIdx=+e.target.value;renderMonthly();});
 
 renderAll();
