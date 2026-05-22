@@ -3,343 +3,331 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spot vs Månadsavtal – SE3 Solceller</title>
+<title>Elprisanalys SE3 – Vilket avtal är bäst?</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root{
-  --bg:#f0ede8;--card:#fff;--dark:#161b27;--amber:#d9880e;--blue:#1c65b8;
-  --green:#277a4f;--red:#c53030;--border:#dedad3;--muted:#6b7585;--surf:#f7f5f1;
-  --solar:#f5a623;--combo-c:#277a4f;
+  --bg:#f0ede8;--card:#fff;--dark:#161b27;--border:#dedad3;--muted:#6b7585;--surf:#f7f5f1;
+  --amber:#d9880e;--blue:#1c65b8;--green:#277a4f;--solar:#f5a623;
+  --ca:rgba(28,101,184,0.85);--cb:rgba(217,136,14,0.85);--cc:rgba(39,170,96,0.85);--cd:rgba(160,80,200,0.75);
+  --ca-lt:#e6effa;--cb-lt:#fff8ed;--cc-lt:#e6f9ee;--cd-lt:#f5eaff;
+  --ca-dk:#123b7a;--cb-dk:#7a4406;--cc-dk:#0f5c2e;--cd-dk:#5a1f8a;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Syne',system-ui,sans-serif;background:var(--bg);color:var(--dark);line-height:1.5;-webkit-text-size-adjust:100%;}
+body{font-family:'Syne',system-ui,sans-serif;background:var(--bg);color:var(--dark);line-height:1.6;-webkit-text-size-adjust:100%;}
 
-.hdr{background:var(--dark);color:#fff;padding:2rem 1.25rem 1.75rem;}
-.hdr h1{font-size:clamp(1.5rem,5vw,2.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.1;}
+/* HEADER */
+.hdr{background:var(--dark);color:#fff;padding:2rem 1.25rem 2rem;}
+.hdr-inner{max-width:700px;margin:0 auto;}
+.pill{display:inline-block;background:var(--amber);color:#fff;font-size:.65rem;font-weight:700;letter-spacing:.08em;padding:.2rem .7rem;border-radius:100px;margin-bottom:.8rem;}
+.hdr h1{font-size:clamp(1.6rem,5vw,2.4rem);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:.6rem;}
 .hdr h1 em{color:var(--solar);font-style:normal;}
-.hdr-sub{font-size:.78rem;color:rgba(255,255,255,.5);margin-top:.4rem;}
-.pill{display:inline-block;background:var(--amber);color:#fff;font-size:.65rem;font-weight:700;letter-spacing:.08em;padding:.2rem .65rem;border-radius:100px;margin-bottom:.75rem;}
+.hdr-intro{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.6;max-width:520px;}
 
-.wrap{max-width:680px;margin:0 auto;padding:1.25rem;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.1rem;}
+/* WRAP */
+.wrap{max-width:700px;margin:0 auto;padding:1.25rem;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin-bottom:1.1rem;}
 .card-ttl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1rem;}
 
-.ctrl{margin-bottom:1rem;}
+/* EXPLAINER BOX */
+.explainer{background:var(--surf);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:.9rem 1rem;font-size:.78rem;color:#4a3a20;line-height:1.6;margin-bottom:1rem;}
+.explainer strong{color:var(--dark);}
+.explainer ul{margin-top:.4rem;padding-left:1.2rem;}
+.explainer li{margin-bottom:.2rem;}
+
+/* SETUP */
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.setup-box{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:.85rem;}
+.setup-box.solar-box{background:#fff8ed;border-color:#f5c878;}
+.setup-box.winter-box{background:#edf4ff;border-color:#b3ceee;}
+.setup-icon{font-size:1.4rem;margin-bottom:.3rem;}
+.setup-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.4rem;}
+.setup-row{display:flex;justify-content:space-between;align-items:baseline;font-size:.8rem;margin-bottom:.2rem;}
+.setup-row span{font-family:'DM Mono',monospace;font-weight:700;}
+.setup-row span.plus{color:var(--green);}
+.setup-row span.minus{color:var(--blue);}
+
+/* COMBOS EXPLAINER */
+.combos-list{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
+.combo-item{border-radius:10px;padding:.75rem 1rem;font-size:.82rem;line-height:1.5;}
+.combo-item strong{font-size:.9rem;}
+.combo-item .tag{display:inline-block;font-family:'DM Mono',monospace;font-size:.72rem;font-weight:700;padding:.1rem .45rem;border-radius:5px;margin-right:.4rem;}
+
+/* WINNER CARD */
+.winner-card{border-radius:14px;padding:1.4rem;margin-bottom:1.1rem;position:relative;overflow:hidden;}
+.winner-badge{position:absolute;top:0;right:0;background:rgba(0,0,0,.15);color:#fff;font-size:.62rem;font-weight:800;letter-spacing:.08em;padding:.3rem .8rem;border-radius:0 0 0 10px;}
+.winner-combo{font-size:1.1rem;font-weight:800;margin-bottom:.3rem;}
+.winner-kr{font-family:'DM Mono',monospace;font-size:2.2rem;font-weight:500;line-height:1;margin-bottom:.3rem;}
+.winner-sub{font-size:.78rem;opacity:.8;line-height:1.5;}
+
+/* SCORE ROW */
+.score-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:1.1rem;}
+.score-box{border-radius:10px;padding:.75rem .5rem;text-align:center;}
+.score-tag{font-family:'DM Mono',monospace;font-size:.65rem;font-weight:700;margin-bottom:.25rem;}
+.score-kr{font-family:'DM Mono',monospace;font-size:1.15rem;font-weight:500;line-height:1;margin-bottom:.15rem;}
+.score-lbl{font-size:.62rem;line-height:1.3;}
+
+/* CTRL */
+.ctrl{margin-bottom:.9rem;}
 .ctrl:last-child{margin-bottom:0;}
-.ctrl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem;}
-.ctrl-lbl{font-size:.85rem;font-weight:700;}
-.ctrl-val{font-family:'DM Mono',monospace;font-size:.95rem;font-weight:500;color:var(--blue);}
-.ctrl-desc{font-size:.72rem;color:var(--muted);line-height:1.4;margin-top:.35rem;}
+.ctrl-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem;}
+.ctrl-lbl{font-size:.84rem;font-weight:700;}
+.ctrl-val{font-family:'DM Mono',monospace;font-size:.9rem;color:var(--blue);}
+.ctrl-desc{font-size:.71rem;color:var(--muted);line-height:1.4;margin-top:.25rem;}
 input[type=range]{width:100%;height:6px;accent-color:var(--blue);cursor:pointer;}
 
-/* COMBO CARD */
-.combo-card{background:linear-gradient(135deg,#0f1e2e 0%,#1a3a28 100%);border-radius:14px;padding:1.25rem;margin-bottom:1.1rem;color:#fff;}
-.combo-ttl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.45);margin-bottom:.9rem;}
-.combo-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.9rem;}
-.combo-note{font-size:.72rem;color:rgba(255,255,255,.55);line-height:1.5;margin-bottom:.75rem;}
-.combo-note strong{color:#fff;}
+/* YEAR SELECTOR */
+.yr-wrap{display:flex;align-items:center;gap:1rem;}
+.yr-disp{font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;min-width:58px;}
+.yr-sl{flex:1;}
+.yr-labs{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);margin-top:.2rem;}
 
-/* INTRADAY */
-.intra-card{background:var(--dark);border-radius:14px;padding:1.25rem;margin-bottom:1.1rem;color:#fff;}
-.intra-ttl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.45);margin-bottom:.9rem;}
-.intra-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;}
-.intra-box{border-radius:10px;padding:.85rem 1rem;}
-.ib-sell{background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);}
-.ib-buy{background:rgba(28,101,184,.15);border:1px solid rgba(28,101,184,.3);}
-.ib-head{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem;}
-.ib-sell .ib-head{color:var(--solar);}
-.ib-buy .ib-head{color:#7aadee;}
-.ib-num{font-family:'DM Mono',monospace;font-size:1.35rem;font-weight:500;line-height:1;}
-.ib-sub{font-size:.68rem;color:rgba(255,255,255,.45);margin-top:.25rem;line-height:1.4;}
-.intra-ctrl{margin-bottom:.85rem;}
-.intra-ctrl:last-child{margin-bottom:0;}
-.intra-ctrl .ctrl-head{color:#fff;}
-.intra-ctrl .ctrl-val{color:#7aadee;}
-.intra-ctrl .ctrl-desc{color:rgba(255,255,255,.45);}
-.intra-ctrl input[type=range]{accent-color:#7aadee;}
-.impact-arrow{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:rgba(255,255,255,.55);margin-top:.75rem;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.1);}
-.impact-arrow strong{color:#fff;}
+/* MONTH TABLE */
+.mtbl{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:.5rem;}
+.mtbl th{padding:.4rem .4rem;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--border);text-align:left;}
+.mtbl th.num{text-align:right;}
+.mtbl td{padding:.5rem .4rem;border-bottom:.5px solid var(--border);font-family:'DM Mono',monospace;text-align:right;}
+.mtbl td.name{font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;text-align:left;}
+.mtbl tr.solar-tr{background:linear-gradient(90deg,#fffbf0 0%,transparent 100%);}
+.mtbl tr:last-child td{border-bottom:none;}
+.mtbl td.best{font-weight:700;}
+.best-mark{font-size:.65rem;margin-left:2px;}
+.solar-tag{display:inline-block;background:#fff3d0;color:#8a5a00;font-size:.6rem;font-weight:700;padding:.05rem .3rem;border-radius:4px;margin-left:4px;}
+.winter-tag{display:inline-block;background:#e8f0ff;color:#1a3a7a;font-size:.6rem;font-weight:700;padding:.05rem .3rem;border-radius:4px;margin-left:4px;}
 
-/* FLOW */
-.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:.4rem;margin:.5rem 0 1rem;}
-.flow-box{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:.6rem .4rem;text-align:center;}
-.flow-box.solar{background:#fff8ed;border-color:#f5c878;}
-.flow-box.grid{background:#edf4ff;border-color:#b3ceee;}
-.flow-box.home{background:#edfaf2;border-color:#9ed4b8;}
-.flow-icon{font-size:1.2rem;display:block;line-height:1;}
-.flow-lbl{font-size:.56rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:.12rem;}
-.flow-num{font-family:'DM Mono',monospace;font-size:.75rem;font-weight:500;margin-top:.1rem;}
-.flow-arr{font-size:.9rem;color:var(--muted);text-align:center;flex-shrink:0;}
-.season-toggle{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:.75rem;}
-.stbtn{flex:1;padding:.5rem;font-size:.78rem;font-weight:700;border:none;background:transparent;cursor:pointer;color:var(--muted);transition:all .15s;}
-.stbtn.active{background:var(--dark);color:#fff;}
+/* ALL YEARS TABLE */
+.ytbl{width:100%;border-collapse:collapse;font-size:.76rem;}
+.ytbl th{padding:.4rem .4rem;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--border);text-align:right;}
+.ytbl th:first-child{text-align:left;}
+.ytbl td{padding:.5rem .4rem;border-bottom:.5px solid var(--border);font-family:'DM Mono',monospace;text-align:right;}
+.ytbl td:first-child{font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;text-align:left;}
+.ytbl tr:last-child td{border-bottom:none;}
+.ytbl tfoot td{font-weight:700;border-top:2px solid var(--border);}
+.badge{display:inline-block;font-size:.62rem;font-weight:700;padding:.12rem .45rem;border-radius:5px;}
 
-/* VERDICT */
-.verdict{border-radius:10px;padding:1rem 1.15rem;font-size:.9rem;font-weight:700;line-height:1.5;margin-bottom:1.1rem;}
-.v-spot{background:#e6effa;color:#123b7a;border:1px solid #b3ceee;}
-.v-fixed{background:#fff8ed;color:#7a4406;border:1px solid #f5c878;}
-.v-equal{background:var(--surf);color:var(--muted);border:1px solid var(--border);}
-.verdict .vsub{font-weight:400;font-size:.76rem;display:block;margin-top:.35rem;opacity:.85;}
-
-/* SCORES — kept for backward compat but hidden now */
-.scores{display:none;}
-
-/* RECS */
-.rec-grid{display:flex;flex-direction:column;gap:.6rem;}
-.rec-row{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.rec-head{display:grid;grid-template-columns:70px 1fr auto;align-items:center;gap:.75rem;padding:.75rem 1rem;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.rec-month{font-weight:800;font-size:.95rem;}
-.rec-bar-wrap{position:relative;height:10px;background:var(--surf);border-radius:5px;overflow:hidden;}
-.rec-bar-spot{position:absolute;top:0;left:0;height:100%;background:rgba(28,101,184,0.7);border-radius:5px 0 0 5px;}
-.rec-bar-fixed{position:absolute;top:0;height:100%;background:rgba(217,136,14,0.7);border-radius:0 5px 5px 0;}
-.rec-badge{font-size:.68rem;font-weight:800;padding:.25rem .6rem;border-radius:20px;white-space:nowrap;flex-shrink:0;}
-.rb-spot{background:#e6f9ee;color:#0f5c2e;}
-.rb-fixed{background:#fff8ed;color:#7a4406;}
-.rb-equal{background:var(--surf);color:var(--muted);border:1px solid var(--border);}
-.rec-detail{padding:0 1rem 1rem;display:none;border-top:1px solid var(--border);}
-.rec-detail.open{display:block;}
-.rec-detail-inner{padding-top:.75rem;font-size:.78rem;color:var(--muted);line-height:1.6;}
-.rec-years{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem;}
-.ry-pill{font-family:'DM Mono',monospace;font-size:.68rem;padding:.15rem .4rem;border-radius:4px;}
-.ry-spot{background:#e6f9ee;color:#0f5c2e;}
-.ry-fixed{background:#fff8ed;color:#7a4406;}
-.ry-eq{background:var(--surf);color:var(--muted);border:1px solid var(--border);}
-
-/* HEATMAP */
-.hmap{width:100%;border-collapse:collapse;font-size:.7rem;font-family:'DM Mono',monospace;}
-.hmap th{padding:.3rem .2rem;font-size:.58rem;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:center;letter-spacing:.04em;}
-.hmap td{padding:.25rem .15rem;text-align:center;}
-.hmap .yr-lbl{font-family:'Syne',sans-serif;font-weight:700;font-size:.72rem;padding-right:.4rem;text-align:right;color:var(--dark);white-space:nowrap;}
-.hm-cell{border-radius:4px;padding:.2rem .1rem;font-size:.62rem;min-width:28px;display:inline-block;width:100%;}
-.hm-spot{background:#deeaf9;color:#123b7a;}
-.hm-fixed{background:#fdefd4;color:#7a4406;}
-.hm-eq{background:#f0ede8;color:#999;}
-
-/* YEAR SEL */
-.yr-sel{display:flex;align-items:center;gap:1rem;}
-.yr-num{font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;min-width:55px;color:var(--dark);}
-.yr-slider{flex:1;}
-.yr-labs{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);margin-top:.2rem;}
-
-/* MONTH ROWS */
-.month-rows{display:flex;flex-direction:column;}
-.mrow{display:grid;grid-template-columns:40px 1fr 1fr 1fr 1fr;align-items:center;gap:.4rem;padding:.4rem 0;border-bottom:.5px solid var(--border);}
-.mrow:last-child{border-bottom:none;}
-.mrow.solar-row{background:linear-gradient(90deg,rgba(245,166,35,.07) 0%,transparent 100%);margin:0 -.25rem;padding-left:.25rem;padding-right:.25rem;}
-.mrow-hdr{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
-.mname{font-weight:700;font-size:.8rem;}
-.solar-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--solar);margin-right:3px;vertical-align:middle;}
-.bar-wrap{position:relative;height:7px;background:var(--surf);border-radius:4px;overflow:hidden;}
-.bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;}
-.mono{font-family:'DM Mono',monospace;}
-.income-val{color:var(--green);}
-.assume{background:#fff8ed;border-left:3px solid var(--solar);border-radius:0 8px 8px 0;padding:.75rem 1rem;font-size:.74rem;color:#6b4a10;line-height:1.5;margin-bottom:1rem;}
-.assume strong{color:#4a2f05;}
-.c-blue{color:var(--blue);}
-.c-amber{color:var(--amber);}
-.c-green{color:var(--green);}
-.c-solar{color:var(--solar);}
-
-/* TABLE */
-.stbl{width:100%;border-collapse:collapse;font-size:.75rem;}
-.stbl th{padding:.4rem .4rem;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
-.stbl td{padding:.5rem .4rem;border-bottom:.5px solid var(--border);font-family:'DM Mono',monospace;}
-.stbl tbody tr:last-child td{border-bottom:none;}
-.yr-td{font-family:'Syne',sans-serif;font-weight:700;}
-.badge{display:inline-block;font-size:.62rem;font-weight:700;padding:.12rem .45rem;border-radius:5px;white-space:nowrap;}
+/* CHART */
 .ch-wrap{position:relative;width:100%;}
-.legend{display:flex;flex-wrap:wrap;gap:.75rem;font-size:.74rem;color:var(--muted);margin:.6rem 0;}
+.legend{display:flex;flex-wrap:wrap;gap:.6rem;font-size:.72rem;color:var(--muted);margin:.5rem 0;}
 .li{display:flex;align-items:center;gap:4px;}
 .lsq{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
 
-footer{text-align:center;padding:2rem 1.25rem;font-size:.68rem;color:var(--muted);}
+/* PER MONTH RECS */
+.rec-grid{display:flex;flex-direction:column;gap:.5rem;}
+.rec-row{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.rec-head{display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:.7rem;padding:.7rem .9rem;cursor:pointer;}
+.rec-mname{font-weight:800;font-size:.9rem;}
+.rec-bar-bg{height:8px;background:var(--surf);border-radius:4px;overflow:hidden;position:relative;}
+.rec-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;}
+.rec-small{font-size:.6rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:3px;}
+.rec-badge{font-size:.65rem;font-weight:800;padding:.22rem .55rem;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.rec-detail{display:none;padding:.75rem .9rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--muted);line-height:1.6;}
+.rec-detail.open{display:block;}
+
+/* HEATMAP */
+.hmap{width:100%;border-collapse:collapse;}
+.hmap th{font-size:.55rem;font-weight:700;text-transform:uppercase;color:var(--muted);padding:.25rem .15rem;text-align:center;}
+.hmap td{padding:.2rem .12rem;text-align:center;}
+.hmap .yr{font-family:'Syne',sans-serif;font-weight:700;font-size:.7rem;text-align:right;padding-right:.35rem;white-space:nowrap;color:var(--dark);}
+.hm{border-radius:4px;padding:.18rem .08rem;font-size:.6rem;font-weight:700;min-width:26px;display:inline-block;width:100%;}
+.hm-a{background:var(--ca-lt);color:var(--ca-dk);}
+.hm-b{background:var(--cb-lt);color:var(--cb-dk);}
+.hm-c{background:var(--cc-lt);color:var(--cc-dk);}
+.hm-d{background:var(--cd-lt);color:var(--cd-dk);}
+.hm-x{background:#f0ede8;color:#bbb;}
+
+footer{text-align:center;padding:2rem 1.25rem;font-size:.67rem;color:var(--muted);}
 </style>
 </head>
 <body>
-
 <header class="hdr">
-  <div style="max-width:680px;margin:0 auto;">
-    <div class="pill">SE3 · NORDPOOL · 2015–2026</div>
-    <h1>Vilket avtal för <em>köp</em> och <em>sälj</em>?</h1>
-    <div class="hdr-sub">Med solceller · Priszon SE3 · Exkl. skatt &amp; nät</div>
+  <div class="hdr-inner">
+    <div class="pill">SE3 · 2015–2026 · 11 hela år</div>
+    <h1>Vilket avtal är <em>bäst</em> för er?</h1>
+    <p class="hdr-intro">Ni har solceller och kan välja <strong style="color:#fff;">köpavtal</strong> och <strong style="color:#fff;">säljavtal</strong> separat. Appen jämför alla 4 kombinationer och visar hur mycket ni betalar netto per år — alltså vad ni köper minus vad ni tjänar på att sälja solel.</p>
   </div>
 </header>
 
 <div class="wrap">
 
-  <!-- INSTÄLLNINGAR -->
-  <div class="card">
-    <div class="card-ttl">Ditt hushåll</div>
-    <div class="ctrl">
-      <div class="ctrl-head"><span class="ctrl-lbl">Förbrukning</span><span class="ctrl-val" id="vC">500 kWh/mån</span></div>
-      <input type="range" id="sC" min="100" max="3000" step="50" value="500">
-      <div class="ctrl-desc">Hushållsförbrukning per månad. Apr–sep: solcellerna producerar dubbelt — ni säljer netto lika mycket som ni förbrukar.</div>
+<!-- FÖRKLARING AV MODELLEN -->
+<div class="card">
+  <div class="card-ttl">Så fungerar er situation</div>
+  <div class="explainer">
+    <strong>Nettokostnad = det ni betalar för köpt el minus det ni tjänar på såld solel.</strong>
+    Ju lägre siffra, desto bättre. Negativ siffra = ni tjänar pengar det månaden.
+  </div>
+  <div class="setup-grid">
+    <div class="setup-box solar-box">
+      <div class="setup-icon">☀️</div>
+      <div class="setup-lbl">Solmånader (maj–aug)</div>
+      <div class="setup-row">Säljer sol: <span class="plus" id="disp-prod">1 000 kWh</span></div>
+      <div class="setup-row">Köper natt: <span class="minus" id="disp-buy-s">500 kWh</span></div>
+      <div class="setup-row">Netto export: <span id="disp-net">+500 kWh</span></div>
     </div>
-    <div class="ctrl">
-      <div class="ctrl-head"><span class="ctrl-lbl">Påslag fast köpavtal</span><span class="ctrl-val" id="vM">5 öre/kWh</span></div>
-      <input type="range" id="sM" min="0" max="20" step="1" value="5">
-      <div class="ctrl-desc">Fast köpavtal = föregående månads spotpris + detta påslag.</div>
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-head"><span class="ctrl-lbl">Påslag fast säljavtal</span><span class="ctrl-val" id="vSM">0 öre/kWh</span></div>
-      <input type="range" id="sSM" min="-10" max="10" step="1" value="0">
-      <div class="ctrl-desc">Fast säljpris = årsgenomsnitt spotpris + detta påslag. Negativt = leverantören betalar dig under snitt. 0 = du får exakt årsgenomsnittet.</div>
+    <div class="setup-box winter-box">
+      <div class="setup-icon">❄️</div>
+      <div class="setup-lbl">Vintermånader (sept–apr)</div>
+      <div class="setup-row">Köper: <span class="minus" id="disp-buy-w">500 kWh</span></div>
+      <div class="setup-row">Säljer: <span>0 kWh</span></div>
+      <div class="setup-row">Spot bra här — <span style="font-size:.72rem;">ladda billigt</span></div>
     </div>
   </div>
-
-  <!-- KOMBINATIONSANALYS -->
-  <div class="combo-card">
-    <div class="combo-ttl">★ Kombinationsanalys — alla 4 alternativ</div>
-    <div class="combo-note">
-      <strong>A:</strong> Spot köp + Spot sälj &nbsp;·&nbsp;
-      <strong>B:</strong> Fast köp + Fast sälj &nbsp;·&nbsp;
-      <strong>C ★:</strong> Spot köp + Fast sälj &nbsp;·&nbsp;
-      <strong>D:</strong> Fast köp + Spot sälj
-    </div>
-    <div class="combo-grid" id="comboCards">Laddar…</div>
-    <div id="comboVs"></div>
-    <div class="ch-wrap" style="height:230px;margin-top:1rem;">
-      <canvas id="cCombo" role="img" aria-label="Nettokostnad per år för alla 4 kombinationer"></canvas>
-    </div>
-  </div>
-
-  <!-- DAGSPRISEFFEKT -->
-  <div class="intra-card">
-    <div class="intra-ttl">⚡ Dagspriseffekt — timpriser påverkar analysen</div>
-    <div class="intra-row">
-      <div class="intra-box ib-sell">
-        <div class="ib-head">☀ Säljer mitt på dagen</div>
-        <div class="ib-num" id="ibSellNum">85%</div>
-        <div class="ib-sub">av månadsmedel. Solpriser är lägre — sol-el trycks ned.</div>
-      </div>
-      <div class="intra-box ib-buy">
-        <div class="ib-head">🌙 Köper morgon/kväll</div>
-        <div class="ib-num" id="ibBuyNum">112%</div>
-        <div class="ib-sub">av månadsmedel. Peak-timmar är dyrare.</div>
-      </div>
-    </div>
-    <div class="intra-ctrl">
-      <div class="ctrl-head"><span class="ctrl-lbl" style="color:#fff;">Exportpris spot (% av månadsmedel)</span><span class="ctrl-val" id="vSF">85%</span></div>
-      <input type="range" id="sSF" min="60" max="100" step="1" value="85">
-      <div class="ctrl-desc">Spotpris under solproduktion jämfört med månadsmedel. Påverkar combo A och D (spot sälj). Combo C (fast sälj) påverkas ej!</div>
-    </div>
-    <div class="intra-ctrl">
-      <div class="ctrl-head"><span class="ctrl-lbl" style="color:#fff;">Inköpspris spot (% av månadsmedel)</span><span class="ctrl-val" id="vBF">112%</span></div>
-      <input type="range" id="sBF" min="100" max="140" step="1" value="112">
-      <div class="ctrl-desc">Spotpris vid köp (morgon/kväll) jämfört med månadsmedel. Påverkar combo A och C (spot köp).</div>
-    </div>
-    <div class="intra-ctrl">
-      <div class="ctrl-head"><span class="ctrl-lbl" style="color:#fff;">Nattandel under solmånader</span><span class="ctrl-val" id="vNF">67%</span></div>
-      <input type="range" id="sNF" min="40" max="85" step="1" value="67">
-      <div class="ctrl-desc">Andel av förbrukning på natten (solcellerna producerar ej) under apr–sep. Standard 67% = 16 av 24h.</div>
-    </div>
-    <div class="impact-arrow" id="intraSummary">Laddar…</div>
-  </div>
-
-  <!-- PRODUKTIONSFLÖDE -->
-  <div class="card">
-    <div class="card-ttl">Produktionsflöde</div>
-    <div class="season-toggle">
-      <button class="stbtn active" onclick="toggleSeason('summer',this)">☀️ Apr–sep (säljer)</button>
-      <button class="stbtn" onclick="toggleSeason('winter',this)">❄️ Okt–mar (köper)</button>
-    </div>
-    <div id="flowSummer">
-      <div class="flow">
-        <div class="flow-box solar"><span class="flow-icon">☀️</span><span class="flow-lbl">Sol</span><span class="flow-num c-solar" id="fProd">1 000 kWh</span></div>
-        <div class="flow-arr">→</div>
-        <div class="flow-box home"><span class="flow-icon">🏠</span><span class="flow-lbl">Hushåll</span><span class="flow-num" id="fCons">500 kWh</span></div>
-        <div class="flow-arr" style="color:var(--green);">→</div>
-        <div class="flow-box grid"><span class="flow-icon">⚡</span><span class="flow-lbl">Säljer</span><span class="flow-num c-green" id="fExp">835 kWh</span></div>
-      </div>
-      <p id="summerNote" style="font-size:.73rem;color:var(--muted);">Ni säljer ~835 kWh/mån på dagen och köper ~335 kWh/mån på natten.</p>
-    </div>
-    <div id="flowWinter" style="display:none;">
-      <div class="flow">
-        <div class="flow-box grid"><span class="flow-icon">⚡</span><span class="flow-lbl">Elnät</span><span class="flow-num c-blue" id="fBuy">500 kWh</span></div>
-        <div class="flow-arr">→</div>
-        <div class="flow-box home"><span class="flow-icon">🏠</span><span class="flow-lbl">Hushåll</span><span class="flow-num" id="fCons2">500 kWh</span></div>
-        <div class="flow-arr" style="visibility:hidden;">→</div>
-        <div class="flow-box" style="visibility:hidden;"></div>
-      </div>
-      <p style="font-size:.73rem;color:var(--muted);">Spot: köper vid ~<span id="fBuyPct">112</span>% av månadsmedel (peak). Fast: betalar föregående månads snitt + påslag.</p>
-    </div>
-  </div>
-
-  <!-- PLACEHOLDER for scores (hidden) -->
-  <div class="scores" id="scoresBox"></div>
-  <div id="verdictBox"></div>
-
-  <!-- MÅNADSREKOMMENDATIONER -->
-  <div class="card">
-    <div class="card-ttl">Rekommendation per månad — är C bäst?</div>
-    <div class="assume">
-      Visar hur ofta er kombination <strong>C (Spot köp + Fast sälj)</strong> var bäst historiskt, månad för månad. Tryck på en månad för detaljer.
-    </div>
-    <div class="rec-grid" id="recGrid"></div>
-  </div>
-
-  <!-- HEATMAP -->
-  <div class="card">
-    <div class="card-ttl">Heatmap — bästa kombination per månad</div>
-    <div class="legend">
-      <span class="li"><span class="lsq" style="background:#deeaf9;"></span>A: Spot/Spot</span>
-      <span class="li"><span class="lsq" style="background:#fdefd4;"></span>B: Fast/Fast</span>
-      <span class="li"><span class="lsq" style="background:#d4f5e2;"></span>C ★: Spot/Fast</span>
-      <span class="li"><span class="lsq" style="background:#f5eaff;"></span>D: Fast/Spot</span>
-    </div>
-    <div style="overflow-x:auto;"><table class="hmap" id="hmapTable"></table></div>
-  </div>
-
-  <!-- ÅRSVY -->
-  <div class="card">
-    <div class="card-ttl">Zooma in på ett år</div>
-    <div class="yr-sel">
-      <div class="yr-num" id="yrNum">2026</div>
-      <div class="yr-slider">
-        <input type="range" id="sY" min="0" max="11" step="1" value="11" style="accent-color:var(--dark);">
-        <div class="yr-labs"><span>2015</span><span>2026</span></div>
-      </div>
-    </div>
-    <div id="yrVerdict" style="margin-top:.6rem;"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-ttl" id="mTtl">Månadsöversikt 2026</div>
-    <div class="legend">
-      <span class="li"><span class="lsq" style="background:rgba(28,101,184,0.8);"></span>A: Spot/Spot</span>
-      <span class="li"><span class="lsq" style="background:rgba(217,136,14,0.8);"></span>B: Fast/Fast</span>
-      <span class="li"><span class="lsq" style="background:rgba(39,170,96,0.8);"></span>C ★: Spot/Fast</span>
-      <span class="li"><span class="lsq" style="background:rgba(160,80,200,0.72);"></span>D: Fast/Spot</span>
-    </div>
-    <div class="month-rows">
-      <div class="mrow">
-        <div class="mrow-hdr">Mån</div>
-        <div class="mrow-hdr">A</div>
-        <div class="mrow-hdr">B</div>
-        <div class="mrow-hdr">C ★</div>
-        <div class="mrow-hdr">D</div>
-      </div>
-      <div id="mRows"></div>
-    </div>
-  </div>
-
-  <!-- ALLA ÅR -->
-  <div class="card">
-    <div class="card-ttl">Alla år 2015–2026</div>
-    <div class="ch-wrap" style="height:250px;">
-      <canvas id="cO" role="img" aria-label="Nettokostnad per år alla kombinationer"></canvas>
-    </div>
-    <table class="stbl" style="margin-top:1.25rem;">
-      <thead><tr><th>År</th><th>A</th><th>B</th><th>C ★</th><th>D</th><th>Bäst</th></tr></thead>
-      <tbody id="tBody"></tbody>
-      <tfoot id="tFoot"></tfoot>
-    </table>
-  </div>
-
 </div>
 
-<footer>Priskälla: Nordpool via elpriser.nu · SE3 · Exkl. elcertifikat, energiskatt, moms och elnätskostnader</footer>
+<!-- DE 4 KOMBINATIONERNA -->
+<div class="card">
+  <div class="card-ttl">De 4 kombinationerna</div>
+  <div class="explainer">
+    Ni kan ha <strong>olika avtal för köp och sälj</strong>. Det ger 4 möjliga kombinationer. Rörligt (spot) = ni betalar/får det faktiska timpriset. Fast = ni betalar/får ett fast pris oavsett timme.
+  </div>
+  <div class="combos-list">
+    <div class="combo-item" style="background:var(--ca-lt);color:var(--ca-dk);">
+      <span class="tag" style="background:var(--ca);color:#fff;">A</span>
+      <strong>Rörligt köp + Rörligt sälj</strong><br>
+      <span style="font-size:.76rem;">Köper och säljer till spotpris. Ni säljer solel när det är billigast (mitt på dagen) — det är nackdelen. Men ni kan ladda elbilen på natten när det är billigt.</span>
+    </div>
+    <div class="combo-item" style="background:var(--cb-lt);color:var(--cb-dk);">
+      <span class="tag" style="background:var(--cb);color:#fff;">B</span>
+      <strong>Fast köp + Fast sälj</strong><br>
+      <span style="font-size:.76rem;">Ni betalar och får ett förutbestämt fast pris hela månaden. Tryggast men leverantören tar en marginal på båda sidor.</span>
+    </div>
+    <div class="combo-item" style="background:var(--cc-lt);color:var(--cc-dk);border:2px solid rgba(39,170,96,0.4);">
+      <span class="tag" style="background:var(--cc);color:#fff;">C ★</span>
+      <strong>Rörligt köp + Fast sälj — er hypotes</strong><br>
+      <span style="font-size:.76rem;">Ni säljer solel till ett fast, förutbestämt pris — slipper sälja billigt mitt på dagen. Och ni köper på spot — kan ladda billigt på natten. Kombinerar det bästa av båda.</span>
+    </div>
+    <div class="combo-item" style="background:var(--cd-lt);color:var(--cd-dk);">
+      <span class="tag" style="background:var(--cd);color:#fff;">D</span>
+      <strong>Fast köp + Rörligt sälj</strong><br>
+      <span style="font-size:.76rem;">Ni säljer på spot (= billigt på dagen) men betalar fast pris för köpt el. Det omvända av er hypotes — troligen sämst.</span>
+    </div>
+  </div>
+</div>
+
+<!-- JUSTERA ANTAGANDEN -->
+<div class="card">
+  <div class="card-ttl">Justera era förutsättningar</div>
+  <div class="ctrl">
+    <div class="ctrl-head"><span class="ctrl-lbl">Solproduktion (maj–aug)</span><span class="ctrl-val" id="vProd">1 000 kWh/mån</span></div>
+    <input type="range" id="sProd" min="200" max="3000" step="50" value="1000">
+  </div>
+  <div class="ctrl">
+    <div class="ctrl-head"><span class="ctrl-lbl">Förbrukning (alla månader)</span><span class="ctrl-val" id="vCons">500 kWh/mån</span></div>
+    <input type="range" id="sCons" min="100" max="2000" step="50" value="500">
+    <div class="ctrl-desc">Ni köper denna mängd från nätet — maj–aug på natten, sept–apr dygnet runt.</div>
+  </div>
+  <div class="ctrl">
+    <div class="ctrl-head"><span class="ctrl-lbl">Påslag fast köpavtal</span><span class="ctrl-val" id="vBM">8 öre/kWh</span></div>
+    <input type="range" id="sBM" min="0" max="20" step="1" value="8">
+    <div class="ctrl-desc">Fast köp = föregående månads spotpris + detta påslag. Ni angav 8 öre.</div>
+  </div>
+  <div class="ctrl">
+    <div class="ctrl-head"><span class="ctrl-lbl">Påslag fast säljavtal</span><span class="ctrl-val" id="vSM">0 öre/kWh</span></div>
+    <input type="range" id="sSM" min="-10" max="10" step="1" value="0">
+    <div class="ctrl-desc">Fast sälj = årsgenomsnittet för spotpriset + detta påslag. 0 = ni får exakt årsgenomsnittet.</div>
+  </div>
+  <div class="ctrl">
+    <div class="ctrl-head"><span class="ctrl-lbl">Spotpris vid sälj (% av månadsmedel)</span><span class="ctrl-val" id="vSF">80%</span></div>
+    <input type="range" id="sSF" min="60" max="100" step="1" value="80">
+    <div class="ctrl-desc">Ni säljer solel mitt på dagen när spotpriset är lägre än månadssnittet. Ert diagram visade ~73–85%. Påverkar kombo A och D.</div>
+  </div>
+  <div class="ctrl">
+    <div class="ctrl-head"><span class="ctrl-lbl">Spotpris vid köp (% av månadsmedel)</span><span class="ctrl-val" id="vBF">95%</span></div>
+    <input type="range" id="sBF" min="70" max="130" step="1" value="95">
+    <div class="ctrl-desc">Med spot kan ni välja att köpa/ladda när priset är lågt (natt, helg). Standard 95% = ni lyckas köpa lite under snitt. Påverkar kombo A och C.</div>
+  </div>
+</div>
+
+<!-- VINNARE TOTALT -->
+<div id="winnerSection"></div>
+
+<!-- POÄNG ALLA 4 -->
+<div class="score-row" id="scoreRow"></div>
+
+<!-- GRAF ALLA ÅR -->
+<div class="card">
+  <div class="card-ttl">Nettokostnad per år — alla kombinationer</div>
+  <div class="explainer" style="margin-bottom:.75rem;">
+    <strong>Vad visar staplarna?</strong> Er totala nettokostnad per år i kronor. Det ni betalar för köpt el minus det ni tjänar på såld solel. <strong>Lägre stapel = bättre.</strong> Negativ stapel = ni tjänar pengar det året.
+  </div>
+  <div class="legend">
+    <span class="li"><span class="lsq" style="background:var(--ca);"></span>A: Rörligt/Rörligt</span>
+    <span class="li"><span class="lsq" style="background:var(--cb);"></span>B: Fast/Fast</span>
+    <span class="li"><span class="lsq" style="background:var(--cc);"></span>C ★: Rörligt köp/Fast sälj</span>
+    <span class="li"><span class="lsq" style="background:var(--cd);"></span>D: Fast köp/Rörligt sälj</span>
+  </div>
+  <div class="ch-wrap" style="height:260px;">
+    <canvas id="cO"></canvas>
+  </div>
+</div>
+
+<!-- ÅRSÖVERSIKT TABELL -->
+<div class="card">
+  <div class="card-ttl">Alla år — nettokostnad i kronor (köp minus sälj)</div>
+  <div class="explainer" style="margin-bottom:.75rem;">Lägst siffra = bäst. ★ markerar vinnaren varje år.</div>
+  <table class="ytbl">
+    <thead><tr><th>År</th><th>A</th><th>B</th><th>C ★</th><th>D</th><th>Bäst</th></tr></thead>
+    <tbody id="yBody"></tbody>
+    <tfoot id="yFoot"></tfoot>
+  </table>
+</div>
+
+<!-- ZOOMA IN PÅ ETT ÅR -->
+<div class="card">
+  <div class="card-ttl">Zooma in — månad för månad</div>
+  <div class="yr-wrap">
+    <div class="yr-disp" id="yrDisp">2026</div>
+    <div class="yr-sl">
+      <input type="range" id="sY" min="0" max="11" step="1" value="11" style="accent-color:var(--dark);">
+      <div class="yr-labs"><span>2015</span><span>2026</span></div>
+    </div>
+  </div>
+  <div id="yrVerdict" style="margin-top:.6rem;"></div>
+  <div class="explainer" style="margin:.75rem 0 .5rem;">
+    <strong>Vad visar tabellen?</strong> Nettokostnad i kr per månad för varje kombination. Solmånader (☀ maj–aug): ni säljer el — negativa tal = inkomst. Vintermånader (❄): ni köper — positiva tal = kostnad. ★ = billigaste alternativet den månaden.
+  </div>
+  <table class="mtbl">
+    <thead>
+      <tr>
+        <th>Månad</th>
+        <th class="num">A</th>
+        <th class="num">B</th>
+        <th class="num">C ★</th>
+        <th class="num">D</th>
+      </tr>
+    </thead>
+    <tbody id="mBody"></tbody>
+    <tfoot id="mFoot"></tfoot>
+  </table>
+</div>
+
+<!-- REKOMMENDATION PER MÅNAD -->
+<div class="card">
+  <div class="card-ttl">Rekommendation per månad — är C bäst?</div>
+  <div class="explainer" style="margin-bottom:.75rem;">
+    Visar hur ofta er kombination C (Rörligt köp + Fast sälj) var det billigaste alternativet historiskt, månad för månad 2015–2025. Tryck på en månad för mer info.
+  </div>
+  <div class="rec-grid" id="recGrid"></div>
+</div>
+
+<!-- HEATMAP -->
+<div class="card">
+  <div class="card-ttl">Heatmap — vilket alternativ vann varje månad?</div>
+  <div class="explainer" style="margin-bottom:.75rem;">Varje ruta visar vilket av A/B/C/D som hade lägst nettokostnad. – = ingen data ännu.</div>
+  <div class="legend">
+    <span class="li"><span class="lsq" style="background:var(--ca-lt);border:1px solid var(--ca);"></span>A</span>
+    <span class="li"><span class="lsq" style="background:var(--cb-lt);border:1px solid var(--cb);"></span>B</span>
+    <span class="li"><span class="lsq" style="background:var(--cc-lt);border:1px solid var(--cc);"></span>C ★</span>
+    <span class="li"><span class="lsq" style="background:var(--cd-lt);border:1px solid var(--cd);"></span>D</span>
+  </div>
+  <div style="overflow-x:auto;"><table class="hmap" id="hmapTable"></table></div>
+</div>
+
+</div>
+<footer>Priskälla: Nordpool via elpriser.nu · SE3 · Priser i öre/kWh exkl. elcertifikat, energiskatt, moms och nätavgifter</footer>
 
 <script>
 /* ── DATA ── */
@@ -358,437 +346,330 @@ const PRICES={
   2026:[108.45,110.23,58.66,56.08,86.15,null,null,null,null,null,null,null]
 };
 const MO=['Jan','Feb','Mar','Apr','Maj','Jun','Jul','Aug','Sep','Okt','Nov','Dec'];
-const SOLAR=new Set([3,4,5,6,7,8]);
+
+/* Solar = maj–aug (index 4,5,6,7). Winter = sept–apr (index 8–11, 0–3). */
+const SOLAR=new Set([4,5,6,7]);
 const YEARS=Object.keys(PRICES).map(Number).sort();
-const FULL_YEARS=YEARS.filter(y=>!PRICES[y].includes(null));
+const FULL=YEARS.filter(y=>!PRICES[y].includes(null));
 
 /* ── STATE ── */
-let consumption=500, buyMarkup=5, sellMarkup=0, sellFactor=0.85, buyFactor=1.12, nightFrac=0.67, selIdx=11;
+let prod=1000, cons=500, buyMarkup=8, sellMarkup=0, sellFactor=0.80, buyFactor=0.95, selIdx=11;
 
 /* ── HELPERS ── */
 function isPartial(y){ return PRICES[y].includes(null); }
-function annualAvg(year){ const v=PRICES[year].filter(x=>x!==null); return v.reduce((a,b)=>a+b,0)/v.length; }
+function annualAvg(y){ const v=PRICES[y].filter(x=>x!==null); return v.reduce((a,b)=>a+b,0)/v.length; }
 
-/* Fixed BUY price: prev month spot + buyMarkup */
-function fixedBuyPrices(year){
-  const sp=PRICES[year], prev=PRICES[year-1];
-  const fallback=annualAvg(year);
-  return sp.map((v,m)=>{
-    if(v===null) return null;
-    const base = m===0 ? (prev?prev[11]:fallback) : (sp[m-1]!==null?sp[m-1]:fallback);
-    return (base||fallback)+buyMarkup;
-  });
+/* Fixed buy price for month m of year y: prev month spot + buyMarkup */
+function fixedBuy(y,m){
+  const sp=PRICES[y], prev=PRICES[y-1];
+  const fallback=annualAvg(y);
+  if(m===0) return (prev?prev[11]:fallback)+buyMarkup;
+  return (sp[m-1]!==null?sp[m-1]:fallback)+buyMarkup;
 }
 
-/* Fixed SELL price: annual average spot + sellMarkup (set once per year by contract) */
-function fixedSellPrice(year){
-  return annualAvg(year) + sellMarkup;
-}
+/* Fixed sell price for year y: annual avg + sellMarkup */
+function fixedSell(y){ return annualAvg(y)+sellMarkup; }
 
 /*
-  4 combinations per month:
-  A: Spot köp,  Spot sälj  (fully variable)
-  B: Fast köp,  Fast sälj  (fully fixed)
-  C: Spot köp,  Fast sälj  (user hypothesis)
-  D: Fast köp,  Spot sälj
+  Calculate net cost for one month under each combo.
+  Returns {a,b,c,d} in kronor. Negative = you earn money.
+
+  Solar month (maj–aug):
+    You SELL `prod` kWh (daytime production)
+    You BUY  `cons` kWh (nighttime, can't use solar)
+
+  Winter month (sept–apr):
+    You BUY `cons` kWh. No selling.
+
+  Spot sell price = spot * sellFactor  (you sell at midday = lower than average)
+  Spot buy price  = spot * buyFactor   (you time purchases = can be below average)
+  Fixed sell      = annual avg + sellMarkup
+  Fixed buy       = prev month spot + buyMarkup
 */
-function calcYearAllCombos(year){
-  const sp=PRICES[year];
-  const fbp=fixedBuyPrices(year);
-  const fsp=fixedSellPrice(year);
-  let tA=0,tB=0,tC=0,tD=0;
-  const mA=[],mB=[],mC=[],mD=[];
+function calcMonth(y,m){
+  const sp=PRICES[y][m];
+  if(sp===null) return null;
+  const fb=fixedBuy(y,m), fs=fixedSell(y);
+  const spotSell=sp*sellFactor, spotBuy=sp*buyFactor;
 
-  for(let m=0;m<12;m++){
-    if(sp[m]===null){ mA.push(null);mB.push(null);mC.push(null);mD.push(null);continue; }
-
-    if(SOLAR.has(m)){
-      /* Solar month: sell (1+nightFrac)*C at day price, buy nightFrac*C at night price */
-      const buyKwh=nightFrac*consumption, sellKwh=(1+nightFrac)*consumption;
-
-      // Spot sell prices (adjusted for midday factor)
-      const spotSell = sp[m]*sellFactor;
-      // Fixed sell price (flat, no time-of-day discount — this is the advantage!)
-      const fastSell = fsp;
-      // Spot buy price (evening peak)
-      const spotBuy  = sp[m]*buyFactor;
-      // Fixed buy price
-      const fastBuy  = fbp[m];
-
-      const vA = (spotBuy*buyKwh/100) - (spotSell*sellKwh/100);
-      const vB = (fastBuy*buyKwh/100) - (fastSell*sellKwh/100);
-      const vC = (spotBuy*buyKwh/100) - (fastSell*sellKwh/100);  // ← user hypothesis
-      const vD = (fastBuy*buyKwh/100) - (spotSell*sellKwh/100);
-
-      mA.push(vA);mB.push(vB);mC.push(vC);mD.push(vD);
-      tA+=vA;tB+=vB;tC+=vC;tD+=vD;
-    }else{
-      /* Winter: only buying */
-      const spotBuy = sp[m]*buyFactor;
-      const fastBuy = fbp[m];
-      // No selling in winter — sell price irrelevant
-      const vA = spotBuy*consumption/100;
-      const vB = fastBuy*consumption/100;
-      const vC = spotBuy*consumption/100;  // same as A (spot buy)
-      const vD = fastBuy*consumption/100;  // same as B (fast buy)
-
-      mA.push(vA);mB.push(vB);mC.push(vC);mD.push(vD);
-      tA+=vA;tB+=vB;tC+=vC;tD+=vD;
-    }
+  if(SOLAR.has(m)){
+    // net = buy_cost - sell_income (both in kr)
+    const sellKr=prod/100;  // per öre
+    const buyKr=cons/100;
+    return {
+      a: spotBuy*buyKr  - spotSell*sellKr,
+      b: fb*buyKr       - fs*sellKr,
+      c: spotBuy*buyKr  - fs*sellKr,    // ← er hypotes: rörligt köp, fast sälj
+      d: fb*buyKr       - spotSell*sellKr,
+    };
+  } else {
+    // Winter: only buying
+    const buyKr=cons/100;
+    return {
+      a: spotBuy*buyKr,
+      b: fb*buyKr,
+      c: spotBuy*buyKr,   // same as A for buy; no selling
+      d: fb*buyKr,        // same as B for buy; no selling
+    };
   }
-  return{tA,tB,tC,tD,mA,mB,mC,mD};
 }
 
-/* ── COMBO LABELS & COLORS ── */
-const COMBOS=[
-  {id:'A',lbl:'Spot köp + Spot sälj', short:'A: Spot/Spot', col:'rgba(28,101,184,0.82)', light:'#e6effa', dark:'#123b7a'},
-  {id:'B',lbl:'Fast köp + Fast sälj', short:'B: Fast/Fast', col:'rgba(217,136,14,0.82)', light:'#fff8ed', dark:'#7a4406'},
-  {id:'C',lbl:'Spot köp + Fast sälj ★', short:'C: Spot/Fast ★', col:'rgba(39,170,96,0.82)', light:'#e6f9ee', dark:'#0f5c2e'},
-  {id:'D',lbl:'Fast köp + Spot sälj', short:'D: Fast/Spot', col:'rgba(160,80,200,0.72)', light:'#f5eaff', dark:'#5a1f8a'},
+function calcYear(y){
+  let ta=0,tb=0,tc=0,td=0; const months=[];
+  for(let m=0;m<12;m++){
+    const r=calcMonth(y,m);
+    months.push(r);
+    if(r){ ta+=r.a; tb+=r.b; tc+=r.c; td+=r.d; }
+  }
+  return{ta,tb,tc,td,months};
+}
+
+/* ── COMBOS META ── */
+const CM=[
+  {id:'a',lbl:'A: Rörligt/Rörligt',short:'A',col:'var(--ca)',lt:'var(--ca-lt)',dk:'var(--ca-dk)'},
+  {id:'b',lbl:'B: Fast/Fast',      short:'B',col:'var(--cb)',lt:'var(--cb-lt)',dk:'var(--cb-dk)'},
+  {id:'c',lbl:'C ★ Rörligt köp/Fast sälj',short:'C ★',col:'var(--cc)',lt:'var(--cc-lt)',dk:'var(--cc-dk)'},
+  {id:'d',lbl:'D: Fast köp/Rörligt sälj',short:'D',col:'var(--cd)',lt:'var(--cd-lt)',dk:'var(--cd-dk)'},
 ];
 
-/* ── COMBO COMPARISON — TOP CARD ── */
-let cCombo=null;
-function renderCombo(){
-  const totals={A:0,B:0,C:0,D:0};
-  const winsArr={A:0,B:0,C:0,D:0};
-  const yearly={A:[],B:[],C:[],D:[]};
+/* ── FORMAT ── */
+function fkr(v){ return (v<0?'−':'')+Math.abs(Math.round(v)).toLocaleString('sv')+' kr'; }
+function fkrShort(v){ return (v>=0?'+':'')+Math.round(v).toLocaleString('sv'); }
 
-  FULL_YEARS.forEach(y=>{
-    const{tA,tB,tC,tD}=calcYearAllCombos(y);
-    totals.A+=tA; totals.B+=tB; totals.C+=tC; totals.D+=tD;
-    yearly.A.push(Math.round(tA));
-    yearly.B.push(Math.round(tB));
-    yearly.C.push(Math.round(tC));
-    yearly.D.push(Math.round(tD));
-    const best=Math.min(tA,tB,tC,tD);
-    if(tA===best) winsArr.A++;
-    else if(tB===best) winsArr.B++;
-    else if(tC===best) winsArr.C++;
-    else winsArr.D++;
+/* ── WINNER + SCORE ROW ── */
+let cO=null;
+function renderWinnerAndScores(){
+  let sA=0,sB=0,sC=0,sD=0, wA=0,wB=0,wC=0,wD=0;
+  FULL.forEach(y=>{
+    const{ta,tb,tc,td}=calcYear(y);
+    sA+=ta;sB+=tb;sC+=tc;sD+=td;
+    const best=Math.min(ta,tb,tc,td);
+    if(Math.abs(ta-best)<50)wA++;
+    else if(Math.abs(tb-best)<50)wB++;
+    else if(Math.abs(tc-best)<50)wC++;
+    else wD++;
   });
+  const n=FULL.length;
+  const tots={a:sA,b:sB,c:sC,d:sD};
+  const bestId=Object.entries(tots).sort((a,b)=>a[1]-b[1])[0][0];
+  const bestC=CM.find(c=>c.id===bestId);
+  const avgPerYear=Math.round(tots[bestId]/n);
 
-  const n=FULL_YEARS.length;
-  const best=Object.entries(totals).sort((a,b)=>a[1]-b[1])[0];
-  const bestCombo=COMBOS.find(c=>c.id===best[0]);
+  // Describe why winner
+  let why='';
+  if(bestId==='c') why='Fast sälj ger er årsgenomsnittet för solelen — ni slipper sälja billigt mitt på dagen. Rörligt köp låter er ladda och köpa när det är som billigast.';
+  else if(bestId==='a') why='Rörligt på båda sidor har historiskt gett lägst nettokostnad. Priset på köpt el har i snitt legat lägre än fast-alternativet.';
+  else if(bestId==='b') why='Fast på båda sidor har historiskt gett lägst nettokostnad. Leverantörsmarginalerna vägs upp av prisstabilitet.';
+  else why='Fast köp kombinerat med rörligt sälj har historiskt gett lägst kostnad.';
 
-  // Score cards
-  const cards=COMBOS.map(c=>{
-    const isBest=c.id===best[0];
-    const isHypo=c.id==='C';
-    return`<div style="background:${c.light};border:${isBest?'2px solid '+c.col:'1px solid '+c.col.replace('0.82','0.3)')};border-radius:12px;padding:.9rem;text-align:center;position:relative;">
-      ${isBest?'<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:'+c.col+';color:#fff;font-size:.6rem;font-weight:700;padding:.15rem .5rem;border-radius:20px;white-space:nowrap;">BÄST HISTORISKT</div>':''}
-      ${isHypo&&!isBest?'<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:#666;color:#fff;font-size:.6rem;font-weight:700;padding:.15rem .5rem;border-radius:20px;white-space:nowrap;">ER HYPOTES</div>':''}
-      ${isHypo&&isBest?'<div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:'+c.col+';color:#fff;font-size:.6rem;font-weight:700;padding:.15rem .5rem;border-radius:20px;white-space:nowrap;">BÄST ★ ER HYPOTES</div>':''}
-      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${c.dark};margin-bottom:.4rem;">${c.short}</div>
-      <div style="font-family:'DM Mono',monospace;font-size:1.5rem;font-weight:500;color:${c.dark};line-height:1;">${Math.round(totals[c.id]/n)}</div>
-      <div style="font-size:.65rem;color:${c.dark};opacity:.7;margin-top:.2rem;">kr/år snitt</div>
-      <div style="font-size:.68rem;color:${c.dark};margin-top:.35rem;font-family:'DM Mono',monospace;">${winsArr[c.id]}/${n} år bäst</div>
+  document.getElementById('winnerSection').innerHTML=`
+    <div style="background:${bestC.col.replace('var(--c','var(--c').replace(')','-lt)')};border:2px solid ${bestC.col};border-radius:14px;padding:1.4rem;margin-bottom:1.1rem;position:relative;">
+      <div style="position:absolute;top:0;right:0;background:${bestC.col};color:#fff;font-size:.6rem;font-weight:800;letter-spacing:.08em;padding:.3rem .8rem;border-radius:0 0 0 10px;">BÄST HISTORISKT</div>
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${bestC.dk};margin-bottom:.5rem;">${bestId==='c'?'★ Er hypotes stämmer!':'Historisk vinnare'}</div>
+      <div style="font-size:1.15rem;font-weight:800;color:${bestC.dk};margin-bottom:.25rem;">${bestC.lbl}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;color:${bestC.dk};line-height:1;margin-bottom:.4rem;">${fkr(tots[bestId]/n)}<span style="font-size:.9rem;opacity:.7;">/år i snitt</span></div>
+      <div style="font-size:.78rem;color:${bestC.dk};opacity:.85;line-height:1.5;">${why}</div>
+      <div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid ${bestC.col.replace('var(--c','var(--c').replace(')','-lt)')};font-size:.74rem;color:${bestC.dk};opacity:.7;">
+        Jämfört med sämsta alternativet: ${fkr(Math.max(sA,sB,sC,sD)/n-tots[bestId]/n)} kr/år billigare
+      </div>
+    </div>`;
+
+  // Score row
+  const scoreHTML=CM.map(c=>{
+    const tot=tots[c.id], avg=Math.round(tot/n);
+    const isBest=c.id===bestId;
+    return`<div class="score-box" style="background:${c.lt};border:${isBest?'2px solid '+c.col:'1px solid transparent'};">
+      <div class="score-tag" style="color:${c.dk};">${c.short}</div>
+      <div class="score-kr" style="color:${c.dk};${isBest?'font-weight:700;':''}">${avg>0?'+':''} ${avg.toLocaleString('sv')}</div>
+      <div class="score-lbl" style="color:${c.dk};opacity:.75;">kr/år${isBest?' ★':''}</div>
     </div>`;
   }).join('');
-  document.getElementById('comboCards').innerHTML=cards;
-
-  // Vs C comparison
-  const savVsA=totals.A-totals.C, savVsB=totals.B-totals.C, savVsD=totals.D-totals.C;
-  const vsHtml=`
-    <div style="background:#e6f9ee;border:1px solid rgba(39,170,96,0.4);border-radius:10px;padding:.9rem 1rem;font-size:.82rem;font-weight:700;color:#0f5c2e;margin-top:.75rem;">
-      ★ <strong>Spot köp + Fast sälj</strong> jämfört med övriga (snitt/år):
-      <span style="margin-left:.5rem;opacity:.8;font-weight:400;">
-        vs Spot/Spot: ${savVsA>=0?'+':''}${Math.round(savVsA/n)} kr &nbsp;·&nbsp;
-        vs Fast/Fast: ${savVsB>=0?'+':''}${Math.round(savVsB/n)} kr &nbsp;·&nbsp;
-        vs Fast/Spot: ${savVsD>=0?'+':''}${Math.round(savVsD/n)} kr
-      </span>
-      <span style="display:block;font-size:.72rem;font-weight:400;margin-top:.35rem;opacity:.75;">
-        Positivt = er hypotes sparar mer än alternativet. Fast säljpris eliminerar dagsprisnackdelen vid export — ni slipper sälja när solpriset är lågt.
-      </span>
-    </div>`;
-  document.getElementById('comboVs').innerHTML=vsHtml;
+  document.getElementById('scoreRow').innerHTML=scoreHTML;
 
   // Chart
-  if(cCombo)cCombo.destroy();
-  cCombo=new Chart(document.getElementById('cCombo'),{
-    type:'bar',
-    data:{
-      labels:FULL_YEARS,
-      datasets:COMBOS.map(c=>({
-        label:c.short,
-        data:yearly[c.id],
-        backgroundColor:c.col,
-        borderWidth:0,
-      }))
-    },
+  const yA=[],yB=[],yC=[],yD=[],yLbl=[];
+  YEARS.forEach(y=>{
+    const{ta,tb,tc,td}=calcYear(y);
+    yA.push(Math.round(ta));yB.push(Math.round(tb));yC.push(Math.round(tc));yD.push(Math.round(td));
+    yLbl.push(isPartial(y)?y+'*':String(y));
+  });
+  if(cO)cO.destroy();
+  cO=new Chart(document.getElementById('cO'),{type:'bar',
+    data:{labels:yLbl,datasets:[
+      {label:'A: Rörligt/Rörligt',data:yA,backgroundColor:yLbl.map(l=>l.includes('*')?'rgba(28,101,184,0.4)':'rgba(28,101,184,0.85)'),borderWidth:0},
+      {label:'B: Fast/Fast',data:yB,backgroundColor:yLbl.map(l=>l.includes('*')?'rgba(217,136,14,0.4)':'rgba(217,136,14,0.85)'),borderWidth:0},
+      {label:'C ★',data:yC,backgroundColor:yLbl.map(l=>l.includes('*')?'rgba(39,170,96,0.4)':'rgba(39,170,96,0.85)'),borderWidth:0},
+      {label:'D: Fast/Rörligt',data:yD,backgroundColor:yLbl.map(l=>l.includes('*')?'rgba(160,80,200,0.35)':'rgba(160,80,200,0.75)'),borderWidth:0},
+    ]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:10},color:'#6b7585',boxWidth:11}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} kr`}}
-      },
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:10},color:'#6b7585',boxWidth:11}},
+        tooltip:{callbacks:{label:ctx=>{const v=ctx.parsed.y;return ` ${ctx.dataset.label}: ${v>=0?'+':''}${v.toLocaleString('sv')} kr`;}}}},
       scales:{
         x:{ticks:{font:{family:'DM Mono',size:10},color:'#6b7585',autoSkip:false},grid:{color:'rgba(0,0,0,0.04)'}},
-        y:{ticks:{font:{family:'DM Mono',size:10},color:'#6b7585',callback:v=>v+' kr'},grid:{color:'rgba(0,0,0,0.06)'}}
+        y:{ticks:{font:{family:'DM Mono',size:10},color:'#6b7585',callback:v=>v.toLocaleString('sv')+' kr'},grid:{color:'rgba(0,0,0,0.06)'}}
       }
     }
   });
+
+  // All-year table
+  const rows=YEARS.map(y=>{
+    const{ta,tb,tc,td}=calcYear(y);
+    const best=Math.min(ta,tb,tc,td);
+    const vals=[ta,tb,tc,td];
+    const bestIdx=vals.findIndex(v=>Math.abs(v-best)<50);
+    const bc=CM[bestIdx];
+    const tag=isPartial(y)?` <span style="font-size:.58rem;color:var(--amber);">*</span>`:'';
+    return`<tr>
+      <td>${y}${tag}</td>
+      ${vals.map((v,i)=>`<td style="${i===bestIdx?'font-weight:700;color:'+CM[i].dk+';':''}">${v>=0?'+':''}${Math.round(v).toLocaleString('sv')}${i===bestIdx?' ★':''}</td>`).join('')}
+      <td><span class="badge" style="background:${bc.lt};color:${bc.dk};">${bc.short}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('yBody').innerHTML=rows;
+
+  const totals=[sA,sB,sC,sD];
+  const gtBest=Math.min(...totals);
+  document.getElementById('yFoot').innerHTML=`<tr>
+    <td style="font-family:'Syne',sans-serif;font-weight:700;">TOTALT</td>
+    ${totals.map((v,i)=>`<td style="${v===gtBest?'font-weight:700;color:'+CM[i].dk+';':''}">${v>=0?'+':''}${Math.round(v).toLocaleString('sv')}${v===gtBest?' ★':''}</td>`).join('')}
+    <td></td>
+  </tr>`;
 }
 
-/* ── INTRADAY SUMMARY ── */
-function renderIntraSummary(){
-  let base=0, adj=0;
-  FULL_YEARS.forEach(y=>{
-    const sp=PRICES[y];
-    for(let m=0;m<12;m++){
-      if(SOLAR.has(m)){
-        const bK=nightFrac*consumption, sK=(1+nightFrac)*consumption;
-        base+=(sp[m]*bK/100)-(sp[m]*sK/100);
-        adj +=(sp[m]*buyFactor*bK/100)-(sp[m]*sellFactor*sK/100);
-      }else{
-        base+=(sp[m]*consumption/100);
-        adj +=(sp[m]*buyFactor*consumption/100);
-      }
-    }
-  });
-  const delta=(adj-base)/FULL_YEARS.length;
-  const dir=delta>0?'dyrare':'billigare';
-  const col=delta>0?'#f5a623':'#7aadee';
-  document.getElementById('intraSummary').innerHTML=
-    `Med dessa dagsprisfaktorer blir rörligt spot <strong style="color:${col}">${Math.round(Math.abs(delta))} kr/år ${dir}</strong> jämfört med ett neutralt månadsmedel. Solmånader påverkas — ni köper ${Math.round(nightFrac*100)}% på natten.`;
+/* ── MONTHLY YEAR VIEW ── */
+function renderMonthly(){
+  const y=YEARS[selIdx];
+  document.getElementById('yrDisp').textContent=y;
+  const{ta,tb,tc,td,months}=calcYear(y);
+  const vals=[ta,tb,tc,td];
+  const bestIdx=vals.findIndex(v=>v===Math.min(...vals));
+  const bc=CM[bestIdx];
+  document.getElementById('yrVerdict').innerHTML=`
+    <div style="background:${bc.lt};border:1px solid ${bc.col};border-radius:8px;padding:.75rem 1rem;font-size:.85rem;font-weight:700;color:${bc.dk};">
+      Bäst ${y}${isPartial(y)?'*':''}: ${bc.lbl}<br>
+      <span style="font-weight:400;font-size:.76rem;">Nettokostnad: A=${fkrShort(ta)} · B=${fkrShort(tb)} · C=${fkrShort(tc)} · D=${fkrShort(td)} kr${isPartial(y)?' (jan–maj)':''}</span>
+    </div>`;
+
+  const rows=MO.map((mo,i)=>{
+    const r=months[i];
+    const isSol=SOLAR.has(i);
+    const tag=isSol?`<span class="solar-tag">☀</span>`:`<span class="winter-tag">❄</span>`;
+    if(!r) return`<tr style="opacity:.3;"><td class="name">${mo}</td><td colspan="4" style="text-align:center;font-family:'Syne',sans-serif;font-size:.72rem;color:var(--muted);">Ingen data ännu</td></tr>`;
+    const rv=[r.a,r.b,r.c,r.d];
+    const best=Math.min(...rv);
+    const bestI=rv.findIndex(v=>Math.abs(v-best)<2);
+    return`<tr class="${isSol?'solar-tr':''}">
+      <td class="name">${mo}${tag}</td>
+      ${rv.map((v,i)=>`<td class="${i===bestI?'best':''}" style="${i===bestI?'color:'+CM[i].dk+';':''}">${Math.round(v)>=0?'+':''}${Math.round(v)}${i===bestI?'★':''}</td>`).join('')}
+    </tr>`;
+  }).join('');
+  const totR=[ta,tb,tc,td];
+  const totBest=Math.min(...totR), totBI=totR.findIndex(v=>Math.abs(v-totBest)<2);
+  document.getElementById('mBody').innerHTML=rows;
+  document.getElementById('mFoot').innerHTML=`<tr style="border-top:2px solid var(--border);">
+    <td class="name" style="font-family:'Syne',sans-serif;">TOTAL</td>
+    ${totR.map((v,i)=>`<td class="${i===totBI?'best':''}" style="${i===totBI?'color:'+CM[i].dk+';font-weight:700;':''}">${Math.round(v)>=0?'+':''}${Math.round(v).toLocaleString('sv')}${i===totBI?'★':''}</td>`).join('')}
+  </tr>`;
 }
 
-/* ── RECS PER MONTH (for main contract = C, spot buy + fixed sell) ── */
+/* ── PER MONTH RECS ── */
 function renderRecs(){
   const html=Array.from({length:12},(_,m)=>{
-    const availY=YEARS.filter(y=>PRICES[y][m]!==null);
-    const n=availY.length;
-    // Compare C vs A, C vs B to give per-month recommendation
-    let cBetterThanA=0, cBetterThanB=0, cBetterThanD=0;
-    let totCA=0,totCB=0,totCD=0;
+    const avail=FULL.filter(y=>PRICES[y][m]!==null);
+    const n=avail.length; if(!n) return '';
+    let cBest=0, totSavVsA=0;
     const pills=[];
-
-    availY.forEach(y=>{
-      const{mA,mB,mC,mD}=calcYearAllCombos(y);
-      const vC=mC[m], vA=mA[m], vB=mB[m], vD=mD[m];
-      const diffCA=vA-vC; // positive = C cheaper than A
-      const diffCB=vB-vC;
-      const diffCD=vD-vC;
-      totCA+=diffCA; totCB+=diffCB; totCD+=diffCD;
-      const cBest=vC<=Math.min(vA,vB,vD)+5;
-      pills.push({y,cls:cBest?'ry-spot':'ry-fixed'});
-      if(cBest) cBetterThanA++;
+    avail.forEach(y=>{
+      const r=calcMonth(y,m);
+      if(!r) return;
+      const rv=[r.a,r.b,r.c,r.d];
+      const best=Math.min(...rv);
+      const isC=Math.abs(r.c-best)<5;
+      if(isC) cBest++;
+      totSavVsA+=r.a-r.c; // positive = C cheaper than A
+      pills.push({y,isC});
     });
-    const avgCA=n>0?totCA/n:0;
-    const avgCB=n>0?totCB/n:0;
+    const pct=Math.round(cBest/n*100);
+    const avgSav=Math.round(totSavVsA/n);
     const isSol=SOLAR.has(m);
-    const monthLabel=isSol?`<span style="color:var(--solar);">☀</span> ${MO[m]}`:MO[m];
-    const rowBg=isSol?'style="border-color:#f5c878;"':'';
-    const headBg=isSol?'style="background:#fffbf0;"':'';
-
-    let badge,bCls,advice;
-    const cFrac=cBetterThanA/n;
-    if(cFrac>=0.7){
-      badge='★ Spot/Fast bäst';bCls='rb-spot';
-      advice=`<strong>Er kombination (Spot köp + Fast sälj) var bäst ${cBetterThanA}/${n} år</strong> under ${MO[m]}. Snittbesparing vs Spot/Spot: ${Math.round(avgCA)} kr/mån, vs Fast/Fast: ${Math.round(avgCB)} kr/mån.`;
-    } else if(cFrac>=0.5){
-      badge='Ofta bäst';bCls='rb-spot';
-      advice=`Er kombination bäst ${cBetterThanA}/${n} år. Viss fördel men inte alltid. Vs Spot/Spot: ${Math.round(avgCA)} kr/mån i snitt.`;
+    let badge,bStyle,advice;
+    if(pct>=70){
+      badge=`C bäst ${cBest}/${n} år`;
+      bStyle=`background:var(--cc-lt);color:var(--cc-dk);`;
+      advice=isSol
+        ? `Under solmånaderna lönar sig fast sälj tydligt — ni undviker det låga middagspriset ${cBest} av ${n} år. Snittbesparing vs rörligt sälj: ca ${avgSav} kr/mån.`
+        : `Rörligt köp lönar sig tydligt ${cBest}/${n} år — ni kan ladda billigt. Snittbesparing vs fast köp: ca ${avgSav} kr/mån.`;
+    } else if(pct>=50){
+      badge=`C bäst ${cBest}/${n} år`;
+      bStyle=`background:var(--cc-lt);color:var(--cc-dk);`;
+      advice=`Er kombination vann oftast men inte alltid. Genomsnittlig fördel vs enbart rörligt: ca ${avgSav} kr/mån.`;
     } else {
-      badge='Blandat';bCls='rb-equal';
-      advice=`Blandad bild — er kombination bäst ${cBetterThanA}/${n} år. Vs Spot/Spot: ${Math.round(avgCA)} kr/mån, vs Fast/Fast: ${Math.round(avgCB)} kr/mån.`;
+      badge=`C bäst ${cBest}/${n} år`;
+      bStyle=`background:var(--surf);color:var(--muted);border:1px solid var(--border);`;
+      advice=`Blandat resultat — er kombination vann bara ${cBest}/${n} år under ${MO[m]}. Annan kombination var ofta bättre.`;
     }
-
-    const pillsH=pills.map(p=>`<span class="ry-pill ${p.cls}" title="${p.cls==='ry-spot'?'C bäst':'Annan bäst'}">${p.y}</span>`).join('');
-    const legend=`<span class="ry-pill ry-spot" style="font-size:.62rem;">★C bäst</span> <span class="ry-pill ry-fixed" style="font-size:.62rem;">Annan bäst</span>`;
-
-    return`<div class="rec-row" ${rowBg}>
-      <div class="rec-head" onclick="this.nextElementSibling.classList.toggle('open')" ${headBg}>
-        <div class="rec-month">${monthLabel}</div>
+    const pillsH=pills.map(p=>`<span style="font-family:'DM Mono',monospace;font-size:.65rem;padding:.12rem .35rem;border-radius:4px;background:${p.isC?'var(--cc-lt)':'var(--cb-lt)'};color:${p.isC?'var(--cc-dk)':'var(--cb-dk)'};">${p.y}</span>`).join(' ');
+    const solTag=isSol?`<span class="solar-tag">☀</span>`:`<span class="winter-tag">❄</span>`;
+    return`<div class="rec-row">
+      <div class="rec-head" onclick="this.nextElementSibling.classList.toggle('open')">
+        <div class="rec-mname">${MO[m]}${solTag}</div>
         <div>
-          <div class="rec-bar-wrap">
-            <div class="rec-bar-spot" style="width:${Math.round(cFrac*100)}%;background:rgba(39,170,96,0.7);"></div>
-          </div>
-          <div style="font-size:.62rem;color:var(--muted);margin-top:3px;font-family:'DM Mono',monospace;">C bäst ${cBetterThanA}/${n} år · Snitt vs A: ${Math.round(avgCA)>0?'+':''}${Math.round(avgCA)} kr · vs B: ${Math.round(avgCB)>0?'+':''}${Math.round(avgCB)} kr</div>
+          <div class="rec-bar-bg"><div class="rec-bar-fill" style="width:${pct}%;background:var(--cc);"></div></div>
+          <div class="rec-small">${pct}% av åren var C bäst · snitt ${avgSav>0?'+':''}${avgSav} kr/mån vs A</div>
         </div>
-        <span class="rec-badge ${bCls}">${badge}</span>
+        <span class="rec-badge" style="${bStyle}">${badge}</span>
       </div>
-      <div class="rec-detail"><div class="rec-detail-inner">${advice}<div class="rec-years" style="margin-top:.5rem;">${legend}<br style="margin:.3rem 0;">${pillsH}</div></div></div>
+      <div class="rec-detail">${advice}<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem;">${pillsH}</div></div>
     </div>`;
   }).join('');
   document.getElementById('recGrid').innerHTML=html;
 }
 
-/* ── HEATMAP — show best combo per cell ── */
+/* ── HEATMAP ── */
 function renderHeatmap(){
-  let thead=`<thead><tr><th></th>${MO.map(m=>`<th>${m.substring(0,3)}</th>`).join('')}</tr></thead>`;
+  const cls=['hm-a','hm-b','hm-c','hm-d'];
+  let thead=`<thead><tr><th></th>${MO.map(m=>`<th>${m.slice(0,3)}</th>`).join('')}</tr></thead>`;
   let tbody='<tbody>';
   YEARS.forEach(y=>{
-    const sp=PRICES[y];
-    const{mA,mB,mC,mD}=calcYearAllCombos(y);
-    tbody+=`<tr><td class="yr-lbl">${y}${isPartial(y)?'*':''}</td>`;
+    tbody+=`<tr><td class="yr">${y}${isPartial(y)?'*':''}</td>`;
     for(let m=0;m<12;m++){
-      if(sp[m]===null){tbody+=`<td><span class="hm-cell hm-eq" style="opacity:.25;">–</span></td>`;continue;}
-      const vals=[mA[m],mB[m],mC[m],mD[m]];
-      const best=Math.min(...vals);
-      const idx=vals.findIndex(v=>Math.abs(v-best)<5);
-      const labels=['A','B','C','D'];
-      const classes=['hm-spot','hm-eq','hm-spot','hm-fixed'];
-      const bgColors=['#deeaf9','#e8f9ee','#d4f5e2','#f5eaff'];
-      const txColors=['#123b7a','#0f5c2e','#0f5c2e','#5a1f8a'];
-      const isC=idx===2;
-      const cls=isC?'':'hm-fixed';
-      const lbl=labels[idx];
-      const bg=bgColors[idx], tx=txColors[idx];
-      tbody+=`<td><span class="hm-cell" style="background:${bg};color:${tx};" title="${MO[m]} ${y}: A=${Math.round(vals[0])} B=${Math.round(vals[1])} C=${Math.round(vals[2])} D=${Math.round(vals[3])} kr">${lbl}</span></td>`;
+      if(PRICES[y][m]===null){tbody+=`<td><span class="hm hm-x">–</span></td>`;continue;}
+      const r=calcMonth(y,m);
+      const rv=[r.a,r.b,r.c,r.d];
+      const best=Math.min(...rv);
+      const bi=rv.findIndex(v=>Math.abs(v-best)<2);
+      const lbl=['A','B','C','D'][bi];
+      tbody+=`<td><span class="hm ${cls[bi]}" title="${MO[m]} ${y}: A=${Math.round(rv[0])} B=${Math.round(rv[1])} C=${Math.round(rv[2])} D=${Math.round(rv[3])} kr">${lbl}</span></td>`;
     }
     tbody+='</tr>';
   });
-  tbody+=`</tbody><tfoot><tr><td colspan="13" style="font-size:.62rem;color:var(--muted);padding:.4rem .2rem;">A=Spot/Spot · B=Fast/Fast · C=Spot köp+Fast sälj ★ · D=Fast köp+Spot sälj · *=Delår</td></tr></tfoot>`;
+  tbody+='</tbody><tfoot><tr><td colspan="13" style="font-size:.6rem;color:var(--muted);padding:.35rem .15rem;">* = Delår (data jan–maj)</td></tr></tfoot>';
   document.getElementById('hmapTable').innerHTML=thead+tbody;
 }
 
-/* ── MONTHLY YEAR VIEW ── */
-let cMonthly=null;
-function renderMonthly(){
-  const year=YEARS[selIdx];
-  const{tA,tB,tC,tD,mA,mB,mC,mD}=calcYearAllCombos(year);
-  document.getElementById('mTtl').textContent=`Månadsöversikt ${year}${isPartial(year)?' (delår jan–maj)':''}`;
-  document.getElementById('yrNum').textContent=year;
-
-  const vals=[tA,tB,tC,tD];
-  const best=Math.min(...vals);
-  const bestIdx=vals.findIndex(v=>v===best);
-  const bestCombo=COMBOS[bestIdx];
-  let vHtml=`<div class="verdict" style="background:${bestCombo.light};border:1px solid ${bestCombo.col.replace('0.82','0.4)')};color:${bestCombo.dark};">
-    Bäst ${year}: <strong>${bestCombo.lbl}</strong> — ${Math.round(best)} kr${isPartial(year)?' (jan–maj)':''}
-    ${bestIdx===2?'<span style="margin-left:.4rem;">★ Er hypotes!</span>':''}
-    <span class="vsub" style="color:${bestCombo.dark};opacity:.7;">
-      A:${Math.round(tA)} · B:${Math.round(tB)} · C:${Math.round(tC)} · D:${Math.round(tD)} kr
-    </span>
-  </div>`;
-  document.getElementById('yrVerdict').innerHTML=vHtml;
-
-  const allVals=[mA,mB,mC,mD].flat().filter(v=>v!==null).map(Math.abs);
-  const maxA=Math.max(...allVals,1);
-
-  const rows=MO.map((mo,i)=>{
-    if(mA[i]===null) return`<div class="mrow" style="opacity:.25;"><div class="mname">${mo}</div><div style="grid-column:span 4;font-size:.72rem;color:var(--muted);">Ingen data</div></div>`;
-    const isSol=SOLAR.has(i);
-    const dot=isSol?'<span class="solar-dot"></span>':'';
-    const vals4=[mA[i],mB[i],mC[i],mD[i]];
-    const bestV=Math.min(...vals4);
-    const cols=COMBOS.map((c,ci)=>{
-      const v=Math.round(vals4[ci]);
-      const isBest=Math.abs(vals4[ci]-bestV)<5;
-      const pct=Math.min(100,Math.abs(vals4[ci])/maxA*100);
-      const vc=v<0?'income-val':'';
-      return`<div>
-        <div style="font-size:.58rem;font-weight:700;color:${c.dark};margin-bottom:2px;">${c.id}</div>
-        <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${c.col};${isBest?'outline:2px solid '+c.col.replace('0.82','1)')+';outline-offset:-1px;':''}"></div></div>
-        <div class="mono ${vc}" style="font-size:.7rem;margin-top:2px;${isBest?'font-weight:700;color:'+c.dark+';':''}">${v} kr${isBest?' ★':''}</div>
-      </div>`;
-    }).join('');
-    return`<div class="mrow${isSol?' solar-row':''}" style="grid-template-columns:40px 1fr 1fr 1fr 1fr;">
-      <div class="mname">${dot}${mo}</div>
-      ${cols}
-    </div>`;
-  }).join('');
-  document.getElementById('mRows').innerHTML=rows;
-}
-
-/* ── OVERVIEW TABLE ── */
-let cO=null;
-function renderOverview(){
-  const yLabels=[], yA=[], yB=[], yC=[], yD=[];
-  let sGa=0,sGb=0,sGc=0,sGd=0;
-
-  const rows=YEARS.map(y=>{
-    const{tA,tB,tC,tD}=calcYearAllCombos(y);
-    sGa+=tA;sGb+=tB;sGc+=tC;sGd+=tD;
-    const partial=isPartial(y);
-    yLabels.push(partial?`${y}*`:String(y));
-    yA.push(Math.round(tA));yB.push(Math.round(tB));yC.push(Math.round(tC));yD.push(Math.round(tD));
-    const minV=Math.min(tA,tB,tC,tD);
-    const bestIdx=[tA,tB,tC,tD].findIndex(v=>v===minV);
-    const bc=COMBOS[bestIdx];
-    const partTag=partial?` <span style="font-size:.6rem;color:var(--amber);">delår</span>`:'';
-    return`<tr>
-      <td class="yr-td">${y}${partTag}</td>
-      <td style="${bestIdx===0?'font-weight:700;':''}color:${bestIdx===0?COMBOS[0].dark:'inherit'}">${Math.round(tA)}</td>
-      <td style="${bestIdx===1?'font-weight:700;':''}color:${bestIdx===1?COMBOS[1].dark:'inherit'}">${Math.round(tB)}</td>
-      <td style="${bestIdx===2?'font-weight:700;':''}color:${bestIdx===2?COMBOS[2].dark:'inherit'}">${Math.round(tC)}</td>
-      <td style="${bestIdx===3?'font-weight:700;':''}color:${bestIdx===3?COMBOS[3].dark:'inherit'}">${Math.round(tD)}</td>
-      <td><span class="badge" style="background:${bc.light};color:${bc.dark};">${bc.id}</span></td>
-    </tr>`;
-  });
-  document.getElementById('tBody').innerHTML=rows.join('');
-  const minTot=Math.min(sGa,sGb,sGc,sGd);
-  const tots=[sGa,sGb,sGc,sGd];
-  document.getElementById('tFoot').innerHTML=`<tr style="border-top:1.5px solid var(--border);">
-    <td class="yr-td">TOTALT</td>
-    ${tots.map((v,i)=>`<td style="font-weight:700;${v===minTot?'color:'+COMBOS[i].dark+';':''}">${Math.round(v)}${v===minTot?' ★':''}</td>`).join('')}
-    <td></td>
-  </tr>`;
-
-  if(cO)cO.destroy();
-  cO=new Chart(document.getElementById('cO'),{
-    type:'bar',
-    data:{labels:yLabels,datasets:COMBOS.map(c=>({
-      label:c.short, data:c.id==='A'?yA:c.id==='B'?yB:c.id==='C'?yC:yD,
-      backgroundColor:yLabels.map(l=>l.includes('*')?c.col.replace('0.82','0.4)').replace('0.72','0.3)'):c.col),
-      borderWidth:0
-    }))},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'DM Mono',size:10},color:'#6b7585',boxWidth:11}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y} kr`}}},
-      scales:{
-        x:{ticks:{font:{family:'DM Mono',size:10},color:'#6b7585',autoSkip:false},grid:{color:'rgba(0,0,0,0.04)'}},
-        y:{ticks:{font:{family:'DM Mono',size:10},color:'#6b7585',callback:v=>v+' kr'},grid:{color:'rgba(0,0,0,0.06)'}}
-      }
-    }
-  });
-}
-
-/* ── FLOW NUMBERS ── */
-function updateFlowNumbers(){
-  const buyKwh=Math.round(nightFrac*consumption), sellKwh=Math.round((1+nightFrac)*consumption);
-  document.getElementById('fProd').textContent=(consumption*2).toLocaleString('sv')+' kWh';
-  document.getElementById('fCons').textContent=consumption.toLocaleString('sv')+' kWh';
-  document.getElementById('fExp').textContent=sellKwh.toLocaleString('sv')+' kWh säljs';
-  document.getElementById('fBuy').textContent=consumption.toLocaleString('sv')+' kWh';
-  document.getElementById('fCons2').textContent=consumption.toLocaleString('sv')+' kWh';
-  const fBuyPctEl=document.getElementById('fBuyPct');
-  if(fBuyPctEl) fBuyPctEl.textContent=Math.round(buyFactor*100);
-  const sumNote=document.getElementById('summerNote');
-  if(sumNote) sumNote.textContent=`Ni säljer ${sellKwh} kWh/mån på dagen (vid ${Math.round(sellFactor*100)}% av spotpris) och köper ${buyKwh} kWh/mån på natten. Avtalet påverkar nattpriset!`;
-}
-
-function toggleSeason(s,btn){
-  document.querySelectorAll('.stbtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('flowSummer').style.display=s==='summer'?'block':'none';
-  document.getElementById('flowWinter').style.display=s==='winter'?'block':'none';
+/* ── UPDATE DISPLAY NUMBERS ── */
+function updateSetupDisplay(){
+  document.getElementById('disp-prod').textContent=prod.toLocaleString('sv')+' kWh';
+  document.getElementById('disp-buy-s').textContent=cons.toLocaleString('sv')+' kWh';
+  document.getElementById('disp-net').textContent='+'+(prod-cons).toLocaleString('sv')+' kWh';
+  document.getElementById('disp-buy-w').textContent=cons.toLocaleString('sv')+' kWh';
 }
 
 function renderAll(){
-  updateFlowNumbers();
-  renderIntraSummary();
-  renderCombo();
+  updateSetupDisplay();
+  renderWinnerAndScores();
   renderRecs();
   renderHeatmap();
-  renderOverview();
   renderMonthly();
 }
 
 /* ── EVENTS ── */
-document.getElementById('sC').addEventListener('input',e=>{consumption=+e.target.value;document.getElementById('vC').textContent=consumption.toLocaleString('sv')+' kWh/mån';renderAll();});
-document.getElementById('sM').addEventListener('input',e=>{buyMarkup=+e.target.value;document.getElementById('vM').textContent=e.target.value+' öre/kWh';renderAll();});
+document.getElementById('sProd').addEventListener('input',e=>{prod=+e.target.value;document.getElementById('vProd').textContent=prod.toLocaleString('sv')+' kWh/mån';renderAll();});
+document.getElementById('sCons').addEventListener('input',e=>{cons=+e.target.value;document.getElementById('vCons').textContent=cons.toLocaleString('sv')+' kWh/mån';renderAll();});
+document.getElementById('sBM').addEventListener('input',e=>{buyMarkup=+e.target.value;document.getElementById('vBM').textContent=e.target.value+' öre/kWh';renderAll();});
 document.getElementById('sSM').addEventListener('input',e=>{sellMarkup=+e.target.value;document.getElementById('vSM').textContent=(+e.target.value>0?'+':'')+e.target.value+' öre/kWh';renderAll();});
-document.getElementById('sSF').addEventListener('input',e=>{sellFactor=e.target.value/100;document.getElementById('vSF').textContent=e.target.value+'%';document.getElementById('ibSellNum').textContent=e.target.value+'%';renderAll();});
-document.getElementById('sBF').addEventListener('input',e=>{buyFactor=e.target.value/100;document.getElementById('vBF').textContent=e.target.value+'%';document.getElementById('ibBuyNum').textContent=e.target.value+'%';renderAll();});
-document.getElementById('sNF').addEventListener('input',e=>{nightFrac=e.target.value/100;document.getElementById('vNF').textContent=e.target.value+'%';renderAll();});
-document.getElementById('sY').addEventListener('input',e=>{selIdx=+e.target.value;renderMonthly();});
-
-renderAll();
-</script>
-document.getElementById('sBF').addEventListener('input',e=>{buyFactor=e.target.value/100;document.getElementById('vBF').textContent=e.target.value+'%';document.getElementById('ibBuyNum').textContent=e.target.value+'%';renderAll();});
-document.getElementById('sNF').addEventListener('input',e=>{nightFrac=e.target.value/100;document.getElementById('vNF').textContent=e.target.value+'%';renderAll();});
+document.getElementById('sSF').addEventListener('input',e=>{sellFactor=e.target.value/100;document.getElementById('vSF').textContent=e.target.value+'%';renderAll();});
+document.getElementById('sBF').addEventListener('input',e=>{buyFactor=e.target.value/100;document.getElementById('vBF').textContent=e.target.value+'%';renderAll();});
 document.getElementById('sY').addEventListener('input',e=>{selIdx=+e.target.value;renderMonthly();});
 
 renderAll();
